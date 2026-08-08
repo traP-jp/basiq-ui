@@ -1,0 +1,5 @@
+min_version = "2026.8.3"
+
+[tools]
+pnpm = "11.20.0"
+node = "24.19.0"
