@@ -1,0 +1,68 @@
+{
+  "name": "basiq-ui",
+  "version": "0.0.0",
+  "description": "A traQ-inspired Vue component library.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/traP-jp/basiq-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/traP-jp/basiq-ui/issues"
+  },
+  "homepage": "https://github.com/traP-jp/basiq-ui#readme",
+  "keywords": [
+    "vue",
+    "component-library",
+    "design-system",
+    "traq"
+  ],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/styles.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "pnpm run typecheck && vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "prepack": "pnpm run build",
+    "typecheck": "vue-tsc -p tsconfig.build.json --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "dependencies": {
+    "reka-ui": "2.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@vitejs/plugin-vue": "6.0.8",
+    "@vue/tsconfig": "0.9.1",
+    "typescript": "6.0.3",
+    "vite": "8.2.0",
+    "vue": "3.5.41",
+    "vue-tsc": "3.3.9"
+  },
+  "packageManager": "pnpm@11.20.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
