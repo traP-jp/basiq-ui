@@ -60,9 +60,9 @@ export const Overview: Story = {
     await expect(
       canvas.getByRole("heading", { level: 1, name: "Storybook scaffold" }),
     ).toBeVisible();
-    await expect(canvasElement.querySelector(".basiq-storybook-root")).toHaveAttribute(
-      "data-storybook-mode",
-      String(globals.themeMode),
-    );
+    const storybookRoot = canvasElement.querySelector(".basiq-storybook-root");
+
+    await expect(storybookRoot).not.toBeNull();
+    await expect(storybookRoot).toHaveAttribute("data-storybook-mode", String(globals.themeMode));
   },
 };
