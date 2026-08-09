@@ -1,33 +1,36 @@
 {
   "name": "basiq-ui",
   "version": "0.0.0",
-  "description": "A traQ-inspired Vue component library.",
   "private": true,
-  "type": "module",
+  "description": "A traQ-inspired Vue component library.",
+  "keywords": [
+    "component-library",
+    "design-system",
+    "traq",
+    "vue"
+  ],
+  "homepage": "https://github.com/traP-jp/basiq-ui#readme",
+  "bugs": {
+    "url": "https://github.com/traP-jp/basiq-ui/issues"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/traP-jp/basiq-ui.git"
   },
-  "bugs": {
-    "url": "https://github.com/traP-jp/basiq-ui/issues"
-  },
-  "homepage": "https://github.com/traP-jp/basiq-ui#readme",
-  "keywords": [
-    "vue",
-    "component-library",
-    "design-system",
-    "traq"
-  ],
+  "style": "./dist/styles.css",
   "files": [
     "dist",
     "LICENSE",
     "README.md"
   ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "style": "./dist/styles.css",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -37,32 +40,54 @@
     "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "pnpm run typecheck && vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck",
+    "format": "oxfmt --config oxfmt.config.ts",
+    "format:check": "oxfmt --check --config oxfmt.config.ts",
+    "lint": "pnpm run lint:oxlint && pnpm run lint:eslint && pnpm run lint:stylelint",
+    "lint:eslint": "eslint . --max-warnings 0",
+    "lint:fix": "pnpm run lint:fix:oxlint && pnpm run lint:fix:eslint && pnpm run lint:fix:stylelint",
+    "lint:fix:eslint": "eslint . --fix",
+    "lint:fix:oxlint": "oxlint --fix .",
+    "lint:fix:stylelint": "stylelint \"src/**/*.{css,vue}\" --fix",
+    "lint:oxlint": "oxlint --deny-warnings .",
+    "lint:stylelint": "stylelint \"src/**/*.{css,vue}\"",
     "prepack": "pnpm run build",
     "typecheck": "vue-tsc -p tsconfig.build.json --noEmit"
-  },
-  "peerDependencies": {
-    "vue": "^3.5.0"
   },
   "dependencies": {
     "reka-ui": "2.10.1"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@types/node": "24.13.3",
     "@vitejs/plugin-vue": "6.0.8",
+    "@vue/eslint-config-typescript": "14.9.0",
     "@vue/tsconfig": "0.9.1",
+    "eslint": "10.8.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-oxlint": "1.77.0",
+    "eslint-plugin-vue": "10.10.0",
+    "oxfmt": "0.62.0",
+    "oxlint": "1.77.0",
+    "postcss-html": "2.0.0",
+    "stylelint": "17.14.1",
+    "stylelint-config-html": "2.0.0",
+    "stylelint-config-recommended-vue": "2.0.0",
+    "stylelint-config-standard": "40.0.0",
+    "stylelint-config-standard-vue": "2.0.0",
     "typescript": "6.0.3",
     "vite": "8.2.0",
     "vue": "3.5.41",
     "vue-tsc": "3.3.9"
   },
-  "packageManager": "pnpm@11.20.0",
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
-  }
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "packageManager": "pnpm@11.20.0"
 }
