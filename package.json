@@ -45,7 +45,7 @@
     "provenance": true
   },
   "scripts": {
-    "build": "pnpm run typecheck && vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly",
     "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck",
     "format": "oxfmt --config oxfmt.config.ts",
     "format:check": "oxfmt --check --config oxfmt.config.ts",
