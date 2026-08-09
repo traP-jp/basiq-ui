@@ -15,9 +15,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: fileURLToPath(new URL("./src/index.ts", import.meta.url)),
-        styles: fileURLToPath(
-          new URL("./src/styles/index.css", import.meta.url),
-        ),
+        styles: fileURLToPath(new URL("./src/styles/index.css", import.meta.url)),
       },
       formats: ["es"],
       cssFileName: "styles",
