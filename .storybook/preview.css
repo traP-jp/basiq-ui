@@ -1,0 +1,107 @@
+.basiq-storybook-root {
+  --storybook-background: #f7f8fa;
+  --storybook-surface: #fff;
+  --storybook-border: #e0e3e8;
+  --storybook-text-primary: #25262a;
+  --storybook-text-secondary: #6b6f76;
+  --storybook-accent: #005bac;
+
+  min-height: 100vh;
+  color: var(--storybook-text-primary);
+  background: var(--storybook-background);
+  font-family: Inter, "M PLUS 1p", sans-serif;
+}
+
+.basiq-storybook-root[data-storybook-mode="light"] {
+  color-scheme: light;
+}
+
+.basiq-storybook-root[data-storybook-mode="dark"] {
+  --storybook-background: #1d1f23;
+  --storybook-surface: #282b30;
+  --storybook-border: #41454d;
+  --storybook-text-primary: #f1f2f4;
+  --storybook-text-secondary: #b7bbc2;
+  --storybook-accent: #63b3ed;
+
+  color-scheme: dark;
+}
+
+.basiq-storybook-root[data-storybook-mode="system"] {
+  color-scheme: light dark;
+}
+
+.storybook-scaffold {
+  box-sizing: border-box;
+  width: min(100%, 48rem);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.storybook-scaffold-eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--storybook-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.storybook-scaffold h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 1.1;
+}
+
+.storybook-scaffold-lead {
+  max-width: 38rem;
+  margin: 1rem 0 2rem;
+  color: var(--storybook-text-secondary);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.storybook-scaffold-panel {
+  padding: 1.5rem;
+  border: 1px solid var(--storybook-border);
+  border-radius: 0.75rem;
+  background: var(--storybook-surface);
+}
+
+.storybook-scaffold-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.storybook-scaffold-checks {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.storybook-scaffold-checks li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  line-height: 1.6;
+}
+
+.storybook-scaffold-checks li::before {
+  color: var(--storybook-accent);
+  content: "✓";
+  font-weight: 700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .basiq-storybook-root[data-storybook-mode="system"] {
+    --storybook-background: #1d1f23;
+    --storybook-surface: #282b30;
+    --storybook-border: #41454d;
+    --storybook-text-primary: #f1f2f4;
+    --storybook-text-secondary: #b7bbc2;
+    --storybook-accent: #63b3ed;
+  }
+}

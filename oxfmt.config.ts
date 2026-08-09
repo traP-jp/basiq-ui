@@ -1,7 +1,7 @@
 import { defineConfig } from "oxfmt";
 
 export default defineConfig({
-  ignorePatterns: ["dist/**", "mise.lock", "pnpm-lock.yaml"],
+  ignorePatterns: ["dist/**", "storybook-static/**", "mise.lock", "pnpm-lock.yaml"],
   semi: true,
   singleQuote: false,
   trailingComma: "all",
