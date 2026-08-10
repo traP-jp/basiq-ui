@@ -3,4 +3,5 @@ minimumReleaseAgeStrict: true
 blockExoticSubdeps: true
 saveExact: true
 allowBuilds:
+  esbuild: true
   vue-demi: true

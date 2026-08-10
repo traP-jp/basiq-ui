@@ -17,7 +17,7 @@ jobs:
   quality:
     name: Quality
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -36,8 +36,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Playwright browser
+        run: pnpm playwright:install:ci
+
       - name: Run checks
         run: pnpm check
 
       - name: Build package
         run: pnpm build
+
+      - name: Build Storybook
+        run: pnpm storybook:build

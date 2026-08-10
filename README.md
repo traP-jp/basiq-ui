@@ -16,6 +16,7 @@ Node.jsとpnpmのバージョンはmiseで管理しています。miseを使用�
 ```sh
 mise install
 pnpm install
+pnpm playwright:install
 pnpm build
 ```
 
@@ -29,6 +30,12 @@ pnpm typecheck
 
 # typecheckとライブラリのビルド
 pnpm build
+
+# Storybookを起動
+pnpm storybook
+
+# Storybookをブラウザ上でテスト
+pnpm test
 ```
 
 ## 利用方法

@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": ["dist/**"],
-  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "vue"],
+  "ignorePatterns": ["dist/**", "storybook-static/**"],
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "vue", "vitest"],
   "categories": {
     "correctness": "error"
   },
