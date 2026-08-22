@@ -1,0 +1,18 @@
+:root {
+  --basiq-font-family-sans:
+    "Inter", "M PLUS 1p", "Avenir", "Helvetica Neue", helvetica, arial, "Hiragino Sans",
+    "Yu Gothic", meiryo, sans-serif;
+  --basiq-space-100: 4px;
+  --basiq-space-200: 8px;
+  --basiq-space-300: 12px;
+  --basiq-space-400: 16px;
+  --basiq-space-600: 24px;
+  --basiq-space-800: 32px;
+  --basiq-radius-sm: 4px;
+  --basiq-radius-md: 8px;
+  --basiq-radius-full: 9999px;
+  --basiq-border-width-default: 1px;
+  --basiq-border-width-strong: 2px;
+  --basiq-focus-ring-gap: 2px;
+  --basiq-focus-ring-width: 2px;
+}
