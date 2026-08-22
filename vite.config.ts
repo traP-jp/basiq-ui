@@ -9,14 +9,16 @@ export default defineConfig({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
+    dedupe: ["vue"],
+  },
+  optimizeDeps: {
+    include: ["reka-ui"],
   },
   build: {
-    cssCodeSplit: true,
+    cssCodeSplit: false,
     lib: {
-      entry: {
-        index: fileURLToPath(new URL("./src/index.ts", import.meta.url)),
-        styles: fileURLToPath(new URL("./src/styles/index.css", import.meta.url)),
-      },
+      entry: fileURLToPath(new URL("./src/entry.ts", import.meta.url)),
+      fileName: "index",
       formats: ["es"],
       cssFileName: "styles",
     },

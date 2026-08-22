@@ -8,5 +8,11 @@
     "rootDir": "./src"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "src/**/*.stories.ts", "src/stories/**"]
+  "exclude": [
+    "src/entry.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/**/*.stories.ts",
+    "src/stories/**"
+  ]
 }
