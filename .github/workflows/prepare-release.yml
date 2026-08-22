@@ -1,0 +1,173 @@
+name: Prepare release
+
+run-name: Prepare v${{ inputs.version }} (dry run ${{ inputs.dry_run }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (for example, 0.1.0-beta.0)
+        required: true
+        type: string
+      dry_run:
+        description: Validate without creating a branch or pull request
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+      RELEASE_BRANCH: release/v${{ inputs.version }}
+      RELEASE_TAG: v${{ inputs.version }}
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: ${{ !inputs.dry_run }}
+
+      - name: Install development tools
+        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        with:
+          version: 2026.8.3
+          sha256: 66585ac496c10bf6fbf13272e3e550c1813aed0e1cb780b9bb73c1751de49289
+          install_args: --locked
+          cache: false
+
+      - name: Validate source ref
+        env:
+          SOURCE_REF: ${{ github.ref }}
+        run: |
+          if [[ "$SOURCE_REF" != "refs/heads/main" ]]; then
+            echo "Release preparation must run from main, not $SOURCE_REF." >&2
+            exit 1
+          fi
+
+      - name: Test release preparation
+        run: pnpm test:release
+
+      - name: Validate release plan
+        run: node scripts/prepare-release.mjs --version "$RELEASE_VERSION" --dry-run
+
+      - name: Check release availability
+        run: |
+          check_ref_available() {
+            local ref="$1"
+            local label="$2"
+
+            set +e
+            git ls-remote --exit-code origin "$ref" > /dev/null
+            local status=$?
+            set -e
+
+            if [[ $status -eq 0 ]]; then
+              echo "$label already exists: $ref" >&2
+              exit 1
+            fi
+
+            if [[ $status -ne 2 ]]; then
+              echo "Could not check $label: $ref" >&2
+              exit "$status"
+            fi
+          }
+
+          check_ref_available "refs/heads/$RELEASE_BRANCH" "Release branch"
+          check_ref_available "refs/tags/$RELEASE_TAG" "Git tag"
+
+          registry_status="$(
+            curl \
+              --silent \
+              --show-error \
+              --output /dev/null \
+              --write-out "%{http_code}" \
+              "https://registry.npmjs.org/basiq-ui/$RELEASE_VERSION"
+          )"
+
+          case "$registry_status" in
+            404)
+              ;;
+            200)
+              echo "npm version already exists: basiq-ui@$RELEASE_VERSION" >&2
+              exit 1
+              ;;
+            *)
+              echo "npm registry returned HTTP $registry_status." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Report dry run
+        if: inputs.dry_run
+        run: |
+          echo "## Release dry run" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Validated basiq-ui@$RELEASE_VERSION without creating a branch or pull request." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update package version
+        if: ${{ !inputs.dry_run }}
+        run: |
+          node scripts/prepare-release.mjs --version "$RELEASE_VERSION"
+
+          changed_files="$(git diff --name-only)"
+          if [[ "$changed_files" != "package.json" ]]; then
+            echo "Unexpected changed files:" >&2
+            echo "$changed_files" >&2
+            exit 1
+          fi
+
+      - name: Create release branch
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --create "$RELEASE_BRANCH"
+          git add package.json
+          git commit --message "chore: prepare $RELEASE_TAG"
+          git push origin "$RELEASE_BRANCH"
+
+      - name: Create release pull request
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "$RELEASE_VERSION" == *-beta.* ]]; then
+            npm_dist_tag="next"
+            release_kind="GitHub pre-release"
+          else
+            npm_dist_tag="latest"
+            release_kind="GitHub stable release"
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$RELEASE_BRANCH" \
+            --title "chore: release $RELEASE_TAG" \
+            --body "Prepares basiq-ui@$RELEASE_VERSION for release.
+
+          - npm dist-tag: $npm_dist_tag
+          - Release kind: $release_kind
+
+          This pull request was created by the Prepare release workflow."
+
+      - name: Report release pull request
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "## Release pull request prepared" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Created branch $RELEASE_BRANCH for basiq-ui@$RELEASE_VERSION." >> "$GITHUB_STEP_SUMMARY"

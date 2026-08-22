@@ -1,49 +1,46 @@
 # BasiQ UI
 
-traQのデザインから影響を受けたVue向けのコンポーネントライブラリです。
-現在は開発の初期段階のため、コンポーネントは実装されていません。
+A traQ-inspired Vue component library.
 
-## 開発環境
+## インストール
 
-- mise 2026.8.3以降
-- Node.js 24.19.0
-- pnpm 11.20.0
+```sh
+npm install basiq-ui
+```
 
-Node.jsとpnpmのバージョンはmiseで管理しています。miseを使用しない場合も、上記と同じバージョンを用意してください。
+```sh
+pnpm add basiq-ui
+```
 
-## セットアップ
+## 利用方法
+
+```vue
+<script setup lang="ts">
+import { BasiqButton } from "basiq-ui";
+import "basiq-ui/styles.css";
+</script>
+
+<template>
+  <BasiqButton>ボタン</BasiqButton>
+</template>
+```
+
+## 開発
+
+Node.jsとpnpmのバージョンはmiseで管理しています。
 
 ```sh
 mise install
 pnpm install
 pnpm playwright:install
+pnpm check
 pnpm build
 ```
 
-miseをshellで有効化していない場合は、`pnpm`の代わりに`mise exec -- pnpm`を使用できます。
-
-## 主なコマンド
+Storybookは次のコマンドで起動できます。
 
 ```sh
-# typecheck
-pnpm typecheck
-
-# typecheckとライブラリのビルド
-pnpm build
-
-# Storybookを起動
 pnpm storybook
-
-# Storybookをブラウザ上でテスト
-pnpm test
-```
-
-## 利用方法
-
-公開後は、次のようにCSSをインポートして使用する予定です。
-
-```ts
-import "basiq-ui/styles.css";
 ```
 
 ## ライセンス
