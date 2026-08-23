@@ -32,8 +32,6 @@ jobs:
       pull-requests: write
     env:
       RELEASE_VERSION: ${{ inputs.version }}
-      RELEASE_BRANCH: release/v${{ inputs.version }}
-      RELEASE_TAG: v${{ inputs.version }}
 
     steps:
       - name: Check out main
@@ -59,13 +57,22 @@ jobs:
             exit 1
           fi
 
-      - name: Test release preparation
+      - name: Test release automation
         run: pnpm test:release
 
       - name: Validate release plan
-        run: node scripts/prepare-release.mjs --version "$RELEASE_VERSION" --dry-run
+        id: release_plan
+        run: |
+          plan="$(node scripts/prepare-release.mjs --version "$RELEASE_VERSION" --dry-run)"
+          echo "branch_name=$(jq --raw-output '.branchName' <<< "$plan")" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$(jq --raw-output '.tagName' <<< "$plan")" >> "$GITHUB_OUTPUT"
+          echo "npm_dist_tag=$(jq --raw-output '.npmDistTag' <<< "$plan")" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$(jq --raw-output '.prerelease' <<< "$plan")" >> "$GITHUB_OUTPUT"
 
       - name: Check release availability
+        env:
+          RELEASE_BRANCH: ${{ steps.release_plan.outputs.branch_name }}
+          RELEASE_TAG: ${{ steps.release_plan.outputs.tag_name }}
         run: |
           check_ref_available() {
             local ref="$1"
@@ -133,6 +140,9 @@ jobs:
 
       - name: Create release branch
         if: ${{ !inputs.dry_run }}
+        env:
+          RELEASE_BRANCH: ${{ steps.release_plan.outputs.branch_name }}
+          RELEASE_TAG: ${{ steps.release_plan.outputs.tag_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -145,12 +155,14 @@ jobs:
         if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
+          IS_PRERELEASE: ${{ steps.release_plan.outputs.is_prerelease }}
+          NPM_DIST_TAG: ${{ steps.release_plan.outputs.npm_dist_tag }}
+          RELEASE_BRANCH: ${{ steps.release_plan.outputs.branch_name }}
+          RELEASE_TAG: ${{ steps.release_plan.outputs.tag_name }}
         run: |
-          if [[ "$RELEASE_VERSION" == *-beta.* ]]; then
-            npm_dist_tag="next"
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
             release_kind="GitHub pre-release"
           else
-            npm_dist_tag="latest"
             release_kind="GitHub stable release"
           fi
 
@@ -160,13 +172,15 @@ jobs:
             --title "chore: release $RELEASE_TAG" \
             --body "Prepares basiq-ui@$RELEASE_VERSION for release.
 
-          - npm dist-tag: $npm_dist_tag
+          - npm dist-tag: $NPM_DIST_TAG
           - Release kind: $release_kind
 
           This pull request was created by the Prepare release workflow."
 
       - name: Report release pull request
         if: ${{ !inputs.dry_run }}
+        env:
+          RELEASE_BRANCH: ${{ steps.release_plan.outputs.branch_name }}
         run: |
           echo "## Release pull request prepared" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"

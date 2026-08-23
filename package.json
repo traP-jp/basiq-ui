@@ -67,7 +67,7 @@
     "storybook": "storybook dev -p 6006 --disable-telemetry",
     "storybook:build": "storybook build --disable-telemetry",
     "test": "pnpm run test:release && vitest run",
-    "test:release": "node --test scripts/prepare-release.test.mjs",
+    "test:release": "node --test scripts/release-version.test.mjs scripts/prepare-release.test.mjs scripts/create-publish-plan.test.mjs",
     "test:watch": "vitest",
     "typecheck": "vue-tsc -p tsconfig.json --noEmit"
   },
