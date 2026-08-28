@@ -14,6 +14,18 @@ export type {
 } from "./components/choice-group/BasiqChoiceGroup.vue";
 export { default as BasiqChoiceGroupItem } from "./components/choice-group/BasiqChoiceGroupItem.vue";
 export type { BasiqChoiceGroupItemProps } from "./components/choice-group/BasiqChoiceGroupItem.vue";
+export { default as BasiqFormField } from "./components/form-field/BasiqFormField.vue";
+export type {
+  BasiqFormFieldProps,
+  BasiqFormFieldSlotProps,
+} from "./components/form-field/BasiqFormField.vue";
+export { default as BasiqInput } from "./components/input/BasiqInput.vue";
+export type {
+  BasiqInputEmits,
+  BasiqInputProps,
+  BasiqInputSize,
+  BasiqInputType,
+} from "./components/input/BasiqInput.vue";
 export { default as BasiqToggleButton } from "./components/toggle-button/BasiqToggleButton.vue";
 export type {
   BasiqToggleButtonEmits,

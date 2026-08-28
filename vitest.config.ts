@@ -16,6 +16,14 @@ export default mergeConfig(
       projects: [
         {
           extends: true,
+          test: {
+            name: "ssr",
+            environment: "node",
+            include: ["src/**/*.ssr.test.ts"],
+          },
+        },
+        {
+          extends: true,
           plugins: [
             storybookTest({
               configDir: path.join(dirname, ".storybook"),
