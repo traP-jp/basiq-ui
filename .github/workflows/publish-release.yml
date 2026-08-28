@@ -78,8 +78,7 @@ jobs:
             exit 1
           fi
 
-      - name: Check out manual release commit
-        if: github.event_name == 'workflow_dispatch'
+      - name: Check out release commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -102,13 +101,21 @@ jobs:
             exit 1
           fi
 
-      - name: Check out merged release commit
+      - name: Validate merged release commit
         if: github.event_name == 'pull_request_target'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+        env:
+          EXPECTED_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          if [[ ! "$EXPECTED_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "GitHub returned an invalid release commit." >&2
+            exit 1
+          fi
+
+          actual_commit="$(git rev-parse HEAD)"
+          if [[ "$actual_commit" != "$EXPECTED_COMMIT" ]]; then
+            echo "main changed after the release pull request was merged." >&2
+            exit 1
+          fi
 
       - name: Validate package version change
         if: github.event_name == 'pull_request_target'
