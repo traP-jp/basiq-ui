@@ -1,6 +1,6 @@
 name: Publish release
 
-run-name: Publish release from ${{ github.event.pull_request.head.ref }}
+run-name: Publish release ${{ inputs.version || github.event.pull_request.head.ref }}
 
 on:
   pull_request_target:
@@ -8,6 +8,12 @@ on:
       - main
     types:
       - closed
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version already recorded in package.json
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -20,10 +26,13 @@ jobs:
   build:
     name: Build release package
     if: >-
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      startsWith(github.event.pull_request.head.ref, 'release/v')
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.pull_request.merged == true &&
+        github.event.pull_request.base.ref == 'main' &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        startsWith(github.event.pull_request.head.ref, 'release/v')
+      )
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -40,6 +49,7 @@ jobs:
 
     steps:
       - name: Validate release pull request
+        if: github.event_name == 'pull_request_target'
         env:
           GH_TOKEN: ${{ github.token }}
           PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
@@ -70,9 +80,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.pull_request.merge_commit_sha }}
 
       - name: Validate package version change
+        if: github.event_name == 'pull_request_target'
         env:
           BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
         run: |
@@ -108,6 +119,8 @@ jobs:
       - name: Validate package and create publish plan
         id: publish_plan
         env:
+          DISPATCH_VERSION: ${{ inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           SOURCE_REF: ${{ github.ref }}
         run: |
@@ -119,14 +132,28 @@ jobs:
           is_prerelease="$(jq --raw-output '.prerelease' <<< "$plan")"
 
           if [[ "$SOURCE_REF" != "refs/heads/main" ]]; then
-            echo "Release publishing must run for a pull request merged into main." >&2
+            echo "Release publishing must run from main." >&2
             exit 1
           fi
 
-          if [[ "$HEAD_REF" != "$branch_name" ]]; then
-            echo "Expected release branch $branch_name, got $HEAD_REF." >&2
-            exit 1
-          fi
+          case "$EVENT_NAME" in
+            pull_request_target)
+              if [[ "$HEAD_REF" != "$branch_name" ]]; then
+                echo "Expected release branch $branch_name, got $HEAD_REF." >&2
+                exit 1
+              fi
+              ;;
+            workflow_dispatch)
+              if [[ "$DISPATCH_VERSION" != "$version" ]]; then
+                echo "Expected package version $DISPATCH_VERSION, got $version." >&2
+                exit 1
+              fi
+              ;;
+            *)
+              echo "Unsupported release event: $EVENT_NAME." >&2
+              exit 1
+              ;;
+          esac
 
           {
             echo "version=$version"
@@ -377,24 +404,38 @@ jobs:
 
           echo "should_publish=$should_publish" >> "$GITHUB_OUTPUT"
 
+      - name: Verify Trusted Publishing environment
+        if: steps.npm_state.outputs.should_publish == 'true'
+        run: |
+          node_version="$(node --version)"
+          npm_version="$(npm --version)"
+
+          echo "Node.js: $node_version"
+          echo "npm: $npm_version"
+
+          if [[ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]] ||
+            [[ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ]]; then
+            echo "GitHub Actions did not provide the OIDC request environment." >&2
+            exit 1
+          fi
+
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]] || [[ -n "${NPM_TOKEN:-}" ]]; then
+            echo "Trusted Publishing must run without an npm publish token." >&2
+            exit 1
+          fi
+
+          echo "GitHub Actions OIDC request environment is available."
+
       - name: Publish package
         if: steps.npm_state.outputs.should_publish == 'true'
         env:
-          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/basiq-ui-npmrc
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_DIST_TAG: ${{ needs.build.outputs.npm_dist_tag }}
           RELEASE_VERSION: ${{ needs.build.outputs.version }}
         run: |
-          trap 'rm -f -- "$NPM_CONFIG_USERCONFIG"' EXIT
-
-          if [[ -n "$NODE_AUTH_TOKEN" ]]; then
-            npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN" --location=user
-            echo "A bootstrap NPM_TOKEN is configured. Remove and revoke it after Trusted Publishing is enabled." >> "$GITHUB_STEP_SUMMARY"
-          fi
-
           npm publish "./basiq-ui-$RELEASE_VERSION.tgz" \
             --access public \
             --ignore-scripts \
+            --loglevel verbose \
             --provenance \
             --registry "https://registry.npmjs.org/" \
             --tag "$NPM_DIST_TAG"
