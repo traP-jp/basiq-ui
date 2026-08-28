@@ -5,6 +5,9 @@ import "@fontsource/m-plus-1p/japanese-700.css";
 import type { Preview } from "@storybook/vue3-vite";
 import { defineComponent, h } from "vue";
 
+import BasiqThemeProvider, { type BasiqThemeMode } from "../src/theme/BasiqThemeProvider.vue";
+
+import "../src/styles/index.css";
 import "./preview.css";
 
 const preview: Preview = {
@@ -15,12 +18,13 @@ const preview: Preview = {
         setup() {
           return () =>
             h(
-              "div",
+              BasiqThemeProvider,
               {
                 class: "basiq-storybook-root",
+                mode: context.globals.themeMode as BasiqThemeMode,
                 "data-storybook-mode": context.globals.themeMode,
               },
-              [h(story())],
+              { default: () => h(story()) },
             );
         },
       }),

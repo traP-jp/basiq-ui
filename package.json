@@ -1,7 +1,6 @@
 {
   "name": "basiq-ui",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0-beta.0",
   "description": "A traQ-inspired Vue component library.",
   "keywords": [
     "component-library",
@@ -37,7 +36,10 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles.css",
+    "./styles.css": {
+      "types": "./dist/styles.d.ts",
+      "default": "./dist/styles.css"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -60,9 +62,11 @@
     "playwright:install": "playwright install chromium",
     "playwright:install:ci": "playwright install --with-deps chromium",
     "prepack": "pnpm run build",
+    "release:prepare": "node scripts/prepare-release.mjs",
     "storybook": "storybook dev -p 6006 --disable-telemetry",
     "storybook:build": "storybook build --disable-telemetry",
-    "test": "vitest run",
+    "test": "pnpm run test:release && vitest run",
+    "test:release": "node --test scripts/release-version.test.mjs scripts/prepare-release.test.mjs scripts/create-publish-plan.test.mjs",
     "test:watch": "vitest",
     "typecheck": "vue-tsc -p tsconfig.json --noEmit"
   },

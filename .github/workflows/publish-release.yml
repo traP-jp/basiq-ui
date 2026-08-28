@@ -1,0 +1,552 @@
+name: Publish release
+
+run-name: Publish release from ${{ github.event.pull_request.head.ref }}
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - closed
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build release package
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      artifact_name: ${{ steps.package.outputs.artifact_name }}
+      is_prerelease: ${{ steps.publish_plan.outputs.is_prerelease }}
+      npm_dist_tag: ${{ steps.publish_plan.outputs.npm_dist_tag }}
+      release_commit: ${{ steps.publish_plan.outputs.release_commit }}
+      tag_name: ${{ steps.publish_plan.outputs.tag_name }}
+      tarball_integrity: ${{ steps.package.outputs.integrity }}
+      version: ${{ steps.publish_plan.outputs.version }}
+
+    steps:
+      - name: Validate release pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [[ ! "$PULL_REQUEST_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+            echo "GitHub returned an invalid pull request number." >&2
+            exit 1
+          fi
+
+          changed_files="$RUNNER_TEMP/release-pr-files.json"
+          gh api \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "repos/$GITHUB_REPOSITORY/pulls/$PULL_REQUEST_NUMBER/files?per_page=2" \
+            > "$changed_files"
+
+          if ! jq --exit-status '
+            length == 1 and
+            .[0].filename == "package.json" and
+            .[0].status == "modified" and
+            (.[0] | has("previous_filename") | not)
+          ' "$changed_files" > /dev/null; then
+            echo "A release pull request must modify only package.json." >&2
+            exit 1
+          fi
+
+      - name: Check out release commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Validate package version change
+        env:
+          BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ ! "$BASE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "GitHub returned an invalid base commit." >&2
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$BASE_COMMIT" HEAD; then
+            echo "The pull request base is not an ancestor of the release commit." >&2
+            exit 1
+          fi
+
+          previous_package="$RUNNER_TEMP/package-before-release.json"
+          release_package="$RUNNER_TEMP/package-at-release.json"
+
+          git show "${BASE_COMMIT}:package.json" | jq --sort-keys 'del(.version)' > "$previous_package"
+          git show HEAD:package.json | jq --sort-keys 'del(.version)' > "$release_package"
+
+          if ! cmp --silent "$previous_package" "$release_package"; then
+            echo "A release pull request may only change the package version." >&2
+            exit 1
+          fi
+
+      - name: Install development tools
+        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        with:
+          version: 2026.8.3
+          sha256: 66585ac496c10bf6fbf13272e3e550c1813aed0e1cb780b9bb73c1751de49289
+          install_args: --locked
+          cache: false
+
+      - name: Validate package and create publish plan
+        id: publish_plan
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          SOURCE_REF: ${{ github.ref }}
+        run: |
+          plan="$(node scripts/create-publish-plan.mjs)"
+          version="$(jq --raw-output '.version' <<< "$plan")"
+          branch_name="$(jq --raw-output '.branchName' <<< "$plan")"
+          tag_name="$(jq --raw-output '.tagName' <<< "$plan")"
+          npm_dist_tag="$(jq --raw-output '.npmDistTag' <<< "$plan")"
+          is_prerelease="$(jq --raw-output '.prerelease' <<< "$plan")"
+
+          if [[ "$SOURCE_REF" != "refs/heads/main" ]]; then
+            echo "Release publishing must run for a pull request merged into main." >&2
+            exit 1
+          fi
+
+          if [[ "$HEAD_REF" != "$branch_name" ]]; then
+            echo "Expected release branch $branch_name, got $HEAD_REF." >&2
+            exit 1
+          fi
+
+          {
+            echo "version=$version"
+            echo "tag_name=$tag_name"
+            echo "npm_dist_tag=$npm_dist_tag"
+            echo "is_prerelease=$is_prerelease"
+            echo "release_commit=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm playwright:install:ci
+
+      - name: Check source
+        run: pnpm check
+
+      - name: Build package
+        run: pnpm build
+
+      - name: Create package tarball
+        id: package
+        env:
+          RELEASE_VERSION: ${{ steps.publish_plan.outputs.version }}
+        run: |
+          pack_result="$(npm pack --ignore-scripts --json)"
+          filename="$(jq --raw-output '.[0].filename // empty' <<< "$pack_result")"
+          integrity="$(jq --raw-output '.[0].integrity // empty' <<< "$pack_result")"
+          expected_filename="basiq-ui-$RELEASE_VERSION.tgz"
+
+          if [[ "$filename" != "$expected_filename" || ! -f "$filename" ]]; then
+            echo "npm pack did not create $expected_filename." >&2
+            exit 1
+          fi
+
+          if [[ ! "$integrity" =~ ^sha512-[A-Za-z0-9+/]+={0,2}$ ]]; then
+            echo "npm pack returned an invalid integrity value." >&2
+            exit 1
+          fi
+
+          jq '.[0] | {filename, integrity, files: [.files[].path]}' <<< "$pack_result"
+          {
+            echo "artifact_name=npm-package-${{ github.run_id }}-${{ github.run_attempt }}"
+            echo "integrity=$integrity"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload package tarball
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: basiq-ui-${{ steps.publish_plan.outputs.version }}.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish or verify npm package
+    needs:
+      - build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.19.0
+          package-manager-cache: false
+
+      - name: Download package tarball
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+
+      - name: Verify package tarball
+        env:
+          EXPECTED_INTEGRITY: ${{ needs.build.outputs.tarball_integrity }}
+          NPM_DIST_TAG: ${{ needs.build.outputs.npm_dist_tag }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if [[ ${#RELEASE_VERSION} -gt 256 ]] ||
+            [[ ! "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-beta\.(0|[1-9][0-9]*))?$ ]]; then
+            echo "Build job returned an invalid release version." >&2
+            exit 1
+          fi
+
+          expected_dist_tag="latest"
+          if [[ "$RELEASE_VERSION" == *-beta.* ]]; then
+            expected_dist_tag="next"
+          fi
+
+          if [[ "$NPM_DIST_TAG" != "$expected_dist_tag" ]]; then
+            echo "Build job returned an unexpected npm dist-tag." >&2
+            exit 1
+          fi
+
+          if [[ ! "$EXPECTED_INTEGRITY" =~ ^sha512-[A-Za-z0-9+/]+={0,2}$ ]]; then
+            echo "Build job returned an invalid integrity value." >&2
+            exit 1
+          fi
+
+          tarball_filename="basiq-ui-$RELEASE_VERSION.tgz"
+          if [[ ! -f "$tarball_filename" ]]; then
+            echo "Package tarball not found: $tarball_filename" >&2
+            exit 1
+          fi
+
+          actual_integrity="$(
+            node --input-type=module --eval '
+              import { createHash } from "node:crypto";
+              import { readFileSync } from "node:fs";
+
+              const digest = createHash("sha512").update(readFileSync(process.argv[1])).digest("base64");
+              process.stdout.write(`sha512-${digest}`);
+            ' -- "$tarball_filename"
+          )"
+
+          if [[ "$actual_integrity" != "$EXPECTED_INTEGRITY" ]]; then
+            echo "Downloaded tarball integrity does not match the build output." >&2
+            exit 1
+          fi
+
+          package_json="$RUNNER_TEMP/package.json"
+          tar --extract --gzip --to-stdout --file="$tarball_filename" -- package/package.json > "$package_json"
+
+          if ! jq --exit-status --arg version "$RELEASE_VERSION" '
+            .name == "basiq-ui" and
+            .version == $version and
+            .private != true and
+            .repository.url == "git+https://github.com/traP-jp/basiq-ui.git" and
+            .publishConfig.access == "public" and
+            .publishConfig.provenance == true and
+            ((.publishConfig.registry // "https://registry.npmjs.org/") == "https://registry.npmjs.org/")
+          ' "$package_json" > /dev/null; then
+            echo "Package tarball contains unexpected metadata." >&2
+            exit 1
+          fi
+
+      - name: Check npm release state
+        id: npm_state
+        env:
+          NPM_DIST_TAG: ${{ needs.build.outputs.npm_dist_tag }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+          TARBALL_INTEGRITY: ${{ needs.build.outputs.tarball_integrity }}
+        run: |
+          registry_file="$RUNNER_TEMP/npm-package.json"
+          registry_status="$(
+            curl \
+              --retry 3 \
+              --retry-all-errors \
+              --silent \
+              --show-error \
+              --output "$registry_file" \
+              --write-out "%{http_code}" \
+              "https://registry.npmjs.org/basiq-ui"
+          )"
+
+          current_dist_tag_version=""
+          published_integrity=""
+          version_exists="false"
+
+          case "$registry_status" in
+            200)
+              current_dist_tag_version="$(
+                jq --raw-output --arg tag "$NPM_DIST_TAG" '."dist-tags"[$tag] // ""' "$registry_file"
+              )"
+              version_exists="$(
+                jq --raw-output --arg version "$RELEASE_VERSION" \
+                  'if .versions[$version] then "true" else "false" end' "$registry_file"
+              )"
+              published_integrity="$(
+                jq --raw-output --arg version "$RELEASE_VERSION" \
+                  '.versions[$version].dist.integrity // ""' "$registry_file"
+              )"
+              ;;
+            404)
+              ;;
+            *)
+              echo "npm registry returned HTTP $registry_status." >&2
+              exit 1
+              ;;
+          esac
+
+          compare_versions() {
+            CURRENT_VERSION="$1" TARGET_VERSION="$2" node --input-type=module --eval '
+              const pattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-beta\.(0|[1-9]\d*))?$/;
+
+              function parse(value) {
+                const match = pattern.exec(value);
+                if (!match) throw new Error(`Unsupported release version: ${value}.`);
+                return [...match.slice(1, 4).map(BigInt), match[4] === undefined ? null : BigInt(match[4])];
+              }
+
+              const current = parse(process.env.CURRENT_VERSION);
+              const target = parse(process.env.TARGET_VERSION);
+              let result = 0;
+
+              for (let index = 0; index < 3 && result === 0; index += 1) {
+                result = target[index] < current[index] ? -1 : target[index] > current[index] ? 1 : 0;
+              }
+
+              if (result === 0) {
+                if (target[3] === null && current[3] !== null) result = 1;
+                else if (target[3] !== null && current[3] === null) result = -1;
+                else if (target[3] !== null && current[3] !== null) {
+                  result = target[3] < current[3] ? -1 : target[3] > current[3] ? 1 : 0;
+                }
+              }
+
+              process.stdout.write(String(result));
+            '
+          }
+
+          if [[ "$version_exists" == "true" ]]; then
+            if [[ "$published_integrity" != "$TARBALL_INTEGRITY" ]]; then
+              echo "Published tarball integrity does not match the release artifact." >&2
+              exit 1
+            fi
+
+            if [[ -z "$current_dist_tag_version" ]]; then
+              echo "npm dist-tag $NPM_DIST_TAG is missing." >&2
+              exit 1
+            fi
+
+            comparison="$(compare_versions "$current_dist_tag_version" "$RELEASE_VERSION")"
+            if [[ "$comparison" == "1" ]]; then
+              echo "npm dist-tag $NPM_DIST_TAG points to an older version." >&2
+              exit 1
+            fi
+
+            should_publish="false"
+          else
+            if [[ -n "$current_dist_tag_version" ]]; then
+              comparison="$(compare_versions "$current_dist_tag_version" "$RELEASE_VERSION")"
+              if [[ "$comparison" != "1" ]]; then
+                echo "Release version $RELEASE_VERSION must be newer than npm dist-tag version $current_dist_tag_version." >&2
+                exit 1
+              fi
+            fi
+
+            should_publish="true"
+          fi
+
+          echo "should_publish=$should_publish" >> "$GITHUB_OUTPUT"
+
+      - name: Publish package
+        if: steps.npm_state.outputs.should_publish == 'true'
+        env:
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/basiq-ui-npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_DIST_TAG: ${{ needs.build.outputs.npm_dist_tag }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          trap 'rm -f -- "$NPM_CONFIG_USERCONFIG"' EXIT
+
+          if [[ -n "$NODE_AUTH_TOKEN" ]]; then
+            npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN" --location=user
+            echo "A bootstrap NPM_TOKEN is configured. Remove and revoke it after Trusted Publishing is enabled." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          npm publish "./basiq-ui-$RELEASE_VERSION.tgz" \
+            --access public \
+            --ignore-scripts \
+            --provenance \
+            --registry "https://registry.npmjs.org/" \
+            --tag "$NPM_DIST_TAG"
+
+      - name: Report existing package
+        if: steps.npm_state.outputs.should_publish == 'false'
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: echo "basiq-ui@$RELEASE_VERSION is already published with the expected integrity." >> "$GITHUB_STEP_SUMMARY"
+
+  release:
+    name: Create or verify GitHub release
+    needs:
+      - build
+      - publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Reconcile Git tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IS_PRERELEASE: ${{ needs.build.outputs.is_prerelease }}
+          RELEASE_COMMIT: ${{ needs.build.outputs.release_commit }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag_name }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if [[ ${#RELEASE_VERSION} -gt 256 ]] ||
+            [[ ! "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-beta\.(0|[1-9][0-9]*))?$ ]]; then
+            echo "Build job returned an invalid release version." >&2
+            exit 1
+          fi
+
+          expected_tag="v$RELEASE_VERSION"
+          expected_prerelease="false"
+          if [[ "$RELEASE_VERSION" == *-beta.* ]]; then
+            expected_prerelease="true"
+          fi
+
+          if [[ "$RELEASE_TAG" != "$expected_tag" || "$IS_PRERELEASE" != "$expected_prerelease" ]]; then
+            echo "Build job returned inconsistent release metadata." >&2
+            exit 1
+          fi
+
+          if [[ ! "$RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Build job returned an invalid release commit." >&2
+            exit 1
+          fi
+
+          tag_file="$RUNNER_TEMP/github-tag.json"
+          tag_status="$(
+            curl \
+              --retry 3 \
+              --retry-all-errors \
+              --silent \
+              --show-error \
+              --header "Accept: application/vnd.github+json" \
+              --header "Authorization: Bearer $GH_TOKEN" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              --output "$tag_file" \
+              --write-out "%{http_code}" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG"
+          )"
+
+          case "$tag_status" in
+            200)
+              tag_type="$(jq --raw-output '.object.type' "$tag_file")"
+              tag_commit="$(jq --raw-output '.object.sha' "$tag_file")"
+
+              if [[ "$tag_type" != "commit" || "$tag_commit" != "$RELEASE_COMMIT" ]]; then
+                echo "Git tag $RELEASE_TAG does not point to the release commit." >&2
+                exit 1
+              fi
+              ;;
+            404)
+              ;;
+            *)
+              echo "GitHub tag API returned HTTP $tag_status." >&2
+              exit 1
+              ;;
+          esac
+
+          release_file="$RUNNER_TEMP/github-release.json"
+          release_status="$(
+            curl \
+              --retry 3 \
+              --retry-all-errors \
+              --silent \
+              --show-error \
+              --header "Accept: application/vnd.github+json" \
+              --header "Authorization: Bearer $GH_TOKEN" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              --output "$release_file" \
+              --write-out "%{http_code}" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG"
+          )"
+
+          case "$release_status" in
+            200)
+              release_is_draft="$(jq --raw-output '.draft' "$release_file")"
+              release_is_prerelease="$(jq --raw-output '.prerelease' "$release_file")"
+
+              if [[ "$tag_status" != "200" || "$release_is_draft" != "false" ]]; then
+                echo "GitHub Release $RELEASE_TAG is not in the expected published state." >&2
+                exit 1
+              fi
+
+              if [[ "$release_is_prerelease" != "$IS_PRERELEASE" ]]; then
+                echo "GitHub Release $RELEASE_TAG has an unexpected prerelease state." >&2
+                exit 1
+              fi
+
+              echo "GitHub Release $RELEASE_TAG already exists."
+              exit 0
+              ;;
+            404)
+              ;;
+            *)
+              echo "GitHub Release API returned HTTP $release_status." >&2
+              exit 1
+              ;;
+          esac
+
+          release_arguments=(
+            "$RELEASE_TAG"
+            --generate-notes
+            --title "$RELEASE_TAG"
+          )
+
+          if [[ "$tag_status" == "200" ]]; then
+            release_arguments+=(--verify-tag)
+          else
+            release_arguments+=(--target "$RELEASE_COMMIT")
+          fi
+
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            release_arguments+=(--prerelease)
+          fi
+
+          gh release create \
+            --repo "$GITHUB_REPOSITORY" \
+            "${release_arguments[@]}"
+
+      - name: Report release
+        env:
+          NPM_DIST_TAG: ${{ needs.build.outputs.npm_dist_tag }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag_name }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          echo "## Release complete" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Published basiq-ui@$RELEASE_VERSION with npm dist-tag $NPM_DIST_TAG." >> "$GITHUB_STEP_SUMMARY"
+          echo "GitHub Release: $RELEASE_TAG" >> "$GITHUB_STEP_SUMMARY"
