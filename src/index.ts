@@ -26,6 +26,13 @@ export type {
   BasiqInputSize,
   BasiqInputType,
 } from "./components/input/BasiqInput.vue";
+export { default as BasiqTextarea } from "./components/textarea/BasiqTextarea.vue";
+export type {
+  BasiqTextareaEmits,
+  BasiqTextareaProps,
+  BasiqTextareaResize,
+  BasiqTextareaSize,
+} from "./components/textarea/BasiqTextarea.vue";
 export { default as BasiqToggleButton } from "./components/toggle-button/BasiqToggleButton.vue";
 export type {
   BasiqToggleButtonEmits,

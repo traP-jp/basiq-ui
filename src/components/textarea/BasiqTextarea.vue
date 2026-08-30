@@ -5,10 +5,10 @@ import { useTextControl } from "../text-control/useTextControl";
 
 defineOptions({ inheritAttrs: false });
 
-export type BasiqInputType = "email" | "password" | "search" | "tel" | "text" | "url";
-export type BasiqInputSize = "lg" | "md" | "sm";
+export type BasiqTextareaResize = "none" | "vertical";
+export type BasiqTextareaSize = "lg" | "md" | "sm";
 
-export interface BasiqInputProps {
+export interface BasiqTextareaProps {
   autocomplete?: string;
   defaultValue?: string;
   disabled?: boolean;
@@ -20,15 +20,16 @@ export interface BasiqInputProps {
   minlength?: number | string;
   modelValue?: string;
   name?: string;
-  pattern?: string;
   placeholder?: string;
   readonly?: boolean;
   required?: boolean;
-  size?: BasiqInputSize;
-  type?: BasiqInputType;
+  resize?: BasiqTextareaResize;
+  rows?: number | string;
+  size?: BasiqTextareaSize;
+  wrap?: "hard" | "soft";
 }
 
-export interface BasiqInputEmits {
+export interface BasiqTextareaEmits {
   blur: [event: FocusEvent];
   change: [event: Event];
   focus: [event: FocusEvent];
@@ -36,16 +37,17 @@ export interface BasiqInputEmits {
   "update:modelValue": [value: string];
 }
 
-const props = withDefaults(defineProps<BasiqInputProps>(), {
+const props = withDefaults(defineProps<BasiqTextareaProps>(), {
   disabled: false,
   invalid: undefined,
   readonly: false,
   required: undefined,
+  resize: "vertical",
+  rows: 3,
   size: "md",
-  type: "text",
 });
-const emit = defineEmits<BasiqInputEmits>();
-const inputElement = useTemplateRef<HTMLInputElement>("input");
+const emit = defineEmits<BasiqTextareaEmits>();
+const textareaElement = useTemplateRef<HTMLTextAreaElement>("textarea");
 const {
   currentValue,
   handleValueInput,
@@ -55,8 +57,8 @@ const {
   resolvedId,
   resolvedRequired,
 } = useTextControl({
-  componentName: "BasiqInput",
-  element: inputElement,
+  componentName: "BasiqTextarea",
+  element: textareaElement,
   emitModelValue: (value) => emit("update:modelValue", value),
   props,
 });
@@ -80,8 +82,8 @@ function handleBlur(event: FocusEvent) {
 </script>
 
 <template>
-  <input
-    ref="input"
+  <textarea
+    ref="textarea"
     v-bind="$attrs"
     :id="resolvedId"
     :class="$style.root"
@@ -89,19 +91,20 @@ function handleBlur(event: FocusEvent) {
     :aria-invalid="resolveAriaInvalid()"
     :autocomplete="autocomplete"
     :data-invalid="resolveInvalid() ? '' : undefined"
+    :data-resize="resize"
+    :data-size="size"
     :disabled="disabled"
     :form="form"
     :inputmode="inputmode"
     :maxlength="maxlength"
     :minlength="minlength"
     :name="name"
-    :pattern="pattern"
     :placeholder="placeholder"
     :readonly="readonly"
     :required="resolvedRequired"
-    :data-size="size"
-    :type="type"
+    :rows="rows"
     :value="currentValue"
+    :wrap="wrap"
     @blur="handleBlur"
     @change="handleChange"
     @focus="handleFocus"
@@ -112,10 +115,10 @@ function handleBlur(event: FocusEvent) {
 <style module>
 .root {
   box-sizing: border-box;
+  display: block;
   width: 100%;
   min-width: 0;
-  height: 40px;
-  padding: 0 var(--basiq-space-300);
+  padding: var(--basiq-space-200) var(--basiq-space-300);
   border: var(--basiq-border-width-strong) solid var(--basiq-color-text-control-border);
   border-radius: var(--basiq-radius-sm);
   color: var(--basiq-color-text-control-content);
@@ -123,15 +126,19 @@ function handleBlur(event: FocusEvent) {
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.5;
-  appearance: none;
+  resize: vertical;
 }
 
 .root[data-size="sm"] {
-  height: 36px;
+  padding-block: var(--basiq-space-100);
 }
 
 .root[data-size="lg"] {
-  height: 44px;
+  padding-block: var(--basiq-space-300);
+}
+
+.root[data-resize="none"] {
+  resize: none;
 }
 
 .root::placeholder {
