@@ -1,18 +1,7 @@
 <script setup lang="ts">
-import type { AriaAttributes } from "vue";
-import {
-  computed,
-  getCurrentInstance,
-  inject,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useAttrs,
-  useTemplateRef,
-  watch,
-} from "vue";
+import { useTemplateRef } from "vue";
 
-import { basiqFormFieldContextKey } from "../form-field/context";
+import { useTextControl } from "../text-control/useTextControl";
 
 defineOptions({ inheritAttrs: false });
 
@@ -23,6 +12,7 @@ export interface BasiqInputProps {
   autocomplete?: string;
   defaultValue?: string;
   disabled?: boolean;
+  form?: string;
   id?: string;
   inputmode?: "decimal" | "email" | "none" | "numeric" | "search" | "tel" | "text" | "url";
   invalid?: boolean;
@@ -55,95 +45,24 @@ const props = withDefaults(defineProps<BasiqInputProps>(), {
   type: "text",
 });
 const emit = defineEmits<BasiqInputEmits>();
-const attrs = useAttrs();
-const formField = inject(basiqFormFieldContextKey, null);
-const instance = getCurrentInstance();
-const isControlled = Object.prototype.hasOwnProperty.call(
-  instance?.vnode.props ?? {},
-  "modelValue",
-);
-const resetValue = props.defaultValue ?? props.modelValue ?? "";
-const internalValue = ref(resetValue);
 const inputElement = useTemplateRef<HTMLInputElement>("input");
-const currentValue = computed(() =>
-  isControlled ? (props.modelValue ?? "") : internalValue.value,
-);
-let owningForm: HTMLFormElement | null = null;
-
-if (import.meta.env.DEV && attrs.value !== undefined) {
-  console.warn(
-    "[BasiQ UI] BasiqInput does not support the value attribute. Use v-model or defaultValue instead.",
-  );
-}
-
-watch(
-  [() => props.id, () => formField?.controlId.value],
-  ([id, fieldControlId]) => {
-    if (import.meta.env.DEV && formField !== null && id !== undefined && id !== fieldControlId) {
-      console.warn(
-        "[BasiQ UI] BasiqInput uses the ID owned by BasiqFormField. Set controlId on BasiqFormField instead of id on BasiqInput.",
-      );
-    }
-  },
-  { immediate: true },
-);
-
-onMounted(() => {
-  owningForm = inputElement.value?.form ?? null;
-  owningForm?.addEventListener("reset", handleFormReset);
+const {
+  currentValue,
+  handleValueInput,
+  resolveAriaDescribedBy,
+  resolveAriaInvalid,
+  resolveInvalid,
+  resolvedId,
+  resolvedRequired,
+} = useTextControl({
+  componentName: "BasiqInput",
+  element: inputElement,
+  emitModelValue: (value) => emit("update:modelValue", value),
+  props,
 });
-
-onBeforeUnmount(() => {
-  owningForm?.removeEventListener("reset", handleFormReset);
-});
-
-const resolvedId = computed(() => formField?.controlId.value ?? props.id);
-const forcedInvalid = computed(() => formField?.invalid.value === true || props.invalid === true);
-const resolvedRequired = computed(
-  () => formField?.required.value === true || props.required === true,
-);
-
-function hasAttributeInvalid() {
-  const value = attrs["aria-invalid"];
-
-  return value === true || value === "true" || value === "grammar" || value === "spelling";
-}
-
-function resolveInvalid() {
-  return forcedInvalid.value || hasAttributeInvalid();
-}
-
-function resolveAriaInvalid(): AriaAttributes["aria-invalid"] {
-  if (forcedInvalid.value) return "true";
-
-  const value = attrs["aria-invalid"];
-
-  if (
-    typeof value === "boolean" ||
-    value === "false" ||
-    value === "grammar" ||
-    value === "spelling" ||
-    value === "true"
-  ) {
-    return value;
-  }
-
-  return undefined;
-}
-
-function resolveAriaDescribedBy() {
-  const ids = [attrs["aria-describedby"], formField?.describedBy.value]
-    .flatMap((value) => (typeof value === "string" ? value.split(/\s+/) : []))
-    .filter((value, index, values) => value !== "" && values.indexOf(value) === index);
-
-  return ids.join(" ") || undefined;
-}
 
 function handleInput(event: Event) {
-  const value = (event.target as HTMLInputElement).value;
-
-  if (!isControlled) internalValue.value = value;
-  emit("update:modelValue", value);
+  handleValueInput(event);
   emit("input", event);
 }
 
@@ -158,18 +77,6 @@ function handleFocus(event: FocusEvent) {
 function handleBlur(event: FocusEvent) {
   emit("blur", event);
 }
-
-function handleFormReset(event: Event) {
-  queueMicrotask(() => {
-    if (event.defaultPrevented) return;
-
-    if (isControlled) {
-      emit("update:modelValue", resetValue);
-    } else {
-      internalValue.value = resetValue;
-    }
-  });
-}
 </script>
 
 <template>
@@ -183,6 +90,7 @@ function handleFormReset(event: Event) {
     :autocomplete="autocomplete"
     :data-invalid="resolveInvalid() ? '' : undefined"
     :disabled="disabled"
+    :form="form"
     :inputmode="inputmode"
     :maxlength="maxlength"
     :minlength="minlength"
@@ -208,10 +116,10 @@ function handleFormReset(event: Event) {
   min-width: 0;
   height: 40px;
   padding: 0 var(--basiq-space-300);
-  border: var(--basiq-border-width-strong) solid var(--basiq-color-input-border);
+  border: var(--basiq-border-width-strong) solid var(--basiq-color-text-control-border);
   border-radius: var(--basiq-radius-sm);
-  color: var(--basiq-color-input-content);
-  background: var(--basiq-color-input-background);
+  color: var(--basiq-color-text-control-content);
+  background: var(--basiq-color-text-control-background);
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.5;
@@ -227,7 +135,7 @@ function handleFormReset(event: Event) {
 }
 
 .root::placeholder {
-  color: var(--basiq-color-input-placeholder);
+  color: var(--basiq-color-text-control-placeholder);
   opacity: 1;
 }
 
@@ -237,13 +145,13 @@ function handleFormReset(event: Event) {
 }
 
 .root[data-invalid] {
-  border-color: var(--basiq-color-input-border-invalid);
+  border-color: var(--basiq-color-text-control-border-invalid);
 }
 
 .root:disabled {
-  border-color: var(--basiq-color-input-border-disabled);
+  border-color: var(--basiq-color-text-control-border-disabled);
   color: var(--basiq-color-content-disabled);
-  background: var(--basiq-color-input-background-disabled);
+  background: var(--basiq-color-text-control-background-disabled);
   cursor: not-allowed;
 }
 
