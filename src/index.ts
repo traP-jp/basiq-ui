@@ -6,6 +6,11 @@ export type {
 } from "./components/button/BasiqButton.vue";
 export { default as BasiqCard } from "./components/card/BasiqCard.vue";
 export type { BasiqCardProps } from "./components/card/BasiqCard.vue";
+export { default as BasiqCheckbox } from "./components/checkbox/BasiqCheckbox.vue";
+export type {
+  BasiqCheckboxEmits,
+  BasiqCheckboxProps,
+} from "./components/checkbox/BasiqCheckbox.vue";
 export { default as BasiqChoiceGroup } from "./components/choice-group/BasiqChoiceGroup.vue";
 export type {
   BasiqChoiceGroupEmits,
@@ -26,12 +31,21 @@ export type {
   BasiqInputSize,
   BasiqInputType,
 } from "./components/input/BasiqInput.vue";
+export { default as BasiqRadioGroup } from "./components/radio-group/BasiqRadioGroup.vue";
+export type {
+  BasiqRadioGroupEmits,
+  BasiqRadioGroupItemDefinition,
+  BasiqRadioGroupItemLabelSlotProps,
+  BasiqRadioGroupOrientation,
+  BasiqRadioGroupProps,
+} from "./components/radio-group/BasiqRadioGroup.vue";
+export { default as BasiqSwitch } from "./components/switch/BasiqSwitch.vue";
+export type { BasiqSwitchEmits, BasiqSwitchProps } from "./components/switch/BasiqSwitch.vue";
 export { default as BasiqTextarea } from "./components/textarea/BasiqTextarea.vue";
 export type {
   BasiqTextareaEmits,
   BasiqTextareaProps,
   BasiqTextareaResize,
-  BasiqTextareaSize,
 } from "./components/textarea/BasiqTextarea.vue";
 export { default as BasiqToggleButton } from "./components/toggle-button/BasiqToggleButton.vue";
 export type {
