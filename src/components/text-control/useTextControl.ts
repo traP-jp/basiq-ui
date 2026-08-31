@@ -1,17 +1,8 @@
-import type { AriaAttributes, Ref } from "vue";
-import {
-  computed,
-  getCurrentInstance,
-  inject,
-  onBeforeUnmount,
-  onMounted,
-  onUpdated,
-  ref,
-  useAttrs,
-  watch,
-} from "vue";
+import type { Ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useAttrs } from "vue";
 
-import { basiqFormFieldContextKey } from "../form-field/context";
+import { hasInitialProp } from "../controllable-state/hasInitialProp";
+import { useFormFieldControl } from "../form-field/useFormFieldControl";
 
 interface TextControlProps {
   defaultValue?: string;
@@ -35,22 +26,19 @@ export function useTextControl<Element extends HTMLInputElement | HTMLTextAreaEl
   props,
 }: UseTextControlOptions<Element>) {
   const attrs = useAttrs();
-  const formField = inject(basiqFormFieldContextKey, null);
-  const instance = getCurrentInstance();
-  const isControlled = Object.prototype.hasOwnProperty.call(
-    instance?.vnode.props ?? {},
-    "modelValue",
-  );
+  const isControlled = hasInitialProp("modelValue");
   const resetValue = props.defaultValue ?? props.modelValue ?? "";
   const internalValue = ref(resetValue);
   const currentValue = computed(() =>
     isControlled ? (props.modelValue ?? "") : internalValue.value,
   );
-  const resolvedId = computed(() => formField?.controlId.value ?? props.id);
-  const forcedInvalid = computed(() => formField?.invalid.value === true || props.invalid === true);
-  const resolvedRequired = computed(
-    () => formField?.required.value === true || props.required === true,
-  );
+  const {
+    resolveAriaDescribedBy,
+    resolveAriaInvalid,
+    resolveInvalid,
+    resolvedId,
+    resolvedRequired,
+  } = useFormFieldControl({ componentName, props });
   let owningForm: HTMLFormElement | null = null;
 
   if (import.meta.env.DEV && attrs.value !== undefined) {
@@ -59,59 +47,11 @@ export function useTextControl<Element extends HTMLInputElement | HTMLTextAreaEl
     );
   }
 
-  watch(
-    [() => props.id, () => formField?.controlId.value],
-    ([id, fieldControlId]) => {
-      if (import.meta.env.DEV && formField !== null && id !== undefined && id !== fieldControlId) {
-        console.warn(
-          `[BasiQ UI] ${componentName} uses the ID owned by BasiqFormField. Set controlId on BasiqFormField instead of id on ${componentName}.`,
-        );
-      }
-    },
-    { immediate: true },
-  );
-
   onMounted(syncOwningForm);
   onUpdated(syncOwningForm);
   onBeforeUnmount(() => {
     owningForm?.removeEventListener("reset", handleFormReset);
   });
-
-  function hasAttributeInvalid() {
-    const value = attrs["aria-invalid"];
-
-    return value === true || value === "true" || value === "grammar" || value === "spelling";
-  }
-
-  function resolveInvalid() {
-    return forcedInvalid.value || hasAttributeInvalid();
-  }
-
-  function resolveAriaInvalid(): AriaAttributes["aria-invalid"] {
-    if (forcedInvalid.value) return "true";
-
-    const value = attrs["aria-invalid"];
-
-    if (
-      typeof value === "boolean" ||
-      value === "false" ||
-      value === "grammar" ||
-      value === "spelling" ||
-      value === "true"
-    ) {
-      return value;
-    }
-
-    return undefined;
-  }
-
-  function resolveAriaDescribedBy() {
-    const ids = [attrs["aria-describedby"], formField?.describedBy.value]
-      .flatMap((value) => (typeof value === "string" ? value.split(/\s+/) : []))
-      .filter((value, index, values) => value !== "" && values.indexOf(value) === index);
-
-    return ids.join(" ") || undefined;
-  }
 
   function handleValueInput(event: Event) {
     const value = (event.target as Element).value;
