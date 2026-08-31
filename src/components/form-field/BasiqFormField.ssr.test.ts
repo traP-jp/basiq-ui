@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, defineComponent, h } from "vue";
 import { renderToString } from "vue/server-renderer";
 
@@ -45,5 +45,30 @@ describe("BasiqFormField SSR", () => {
       inputId: "explicit-control",
       labelId: "explicit-control",
     });
+  });
+
+  it("warns when multiple BasiQ controls register with one field", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const Root = defineComponent({
+      setup() {
+        return () =>
+          h(
+            BasiqFormField,
+            { label: "重複したcontrol" },
+            { default: () => [h(BasiqInput), h(BasiqInput)] },
+          );
+      },
+    });
+
+    try {
+      await renderToString(createSSRApp(Root));
+      await Promise.resolve();
+
+      expect(warn).toHaveBeenCalledWith(
+        "[BasiQ UI] BasiqFormField supports one logical control. Multiple controls were registered: BasiqInput, BasiqInput. Use a group component for multiple controls.",
+      );
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

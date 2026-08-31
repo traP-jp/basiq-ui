@@ -1,36 +1,35 @@
 import type { Ref } from "vue";
-import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useAttrs } from "vue";
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref } from "vue";
 
 import { hasInitialProp } from "../controllable-state/hasInitialProp";
 import { useFormFieldControl } from "../form-field/useFormFieldControl";
 
-interface TextControlProps {
-  defaultValue?: string;
+interface CheckableControlProps {
+  defaultValue?: boolean;
   id?: string;
   invalid?: boolean;
-  modelValue?: string;
+  modelValue?: boolean;
   required?: boolean;
 }
 
-interface UseTextControlOptions<Element extends HTMLInputElement | HTMLTextAreaElement> {
+interface UseCheckableControlOptions {
   componentName: string;
-  element: Readonly<Pick<Ref<Element | null>, "value">>;
-  emitModelValue: (value: string) => void;
-  props: TextControlProps;
+  element: Readonly<Pick<Ref<HTMLInputElement | null>, "value">>;
+  emitModelValue: (value: boolean) => void;
+  props: CheckableControlProps;
 }
 
-export function useTextControl<Element extends HTMLInputElement | HTMLTextAreaElement>({
+export function useCheckableControl({
   componentName,
   element,
   emitModelValue,
   props,
-}: UseTextControlOptions<Element>) {
-  const attrs = useAttrs();
+}: UseCheckableControlOptions) {
   const isControlled = hasInitialProp("modelValue");
-  const resetValue = props.defaultValue ?? props.modelValue ?? "";
+  const resetValue = props.defaultValue ?? props.modelValue ?? false;
   const internalValue = ref(resetValue);
   const currentValue = computed(() =>
-    isControlled ? (props.modelValue ?? "") : internalValue.value,
+    isControlled ? (props.modelValue ?? false) : internalValue.value,
   );
   const {
     resolveAriaDescribedBy,
@@ -41,23 +40,20 @@ export function useTextControl<Element extends HTMLInputElement | HTMLTextAreaEl
   } = useFormFieldControl({ componentName, props });
   let owningForm: HTMLFormElement | null = null;
 
-  if (import.meta.env.DEV && attrs.value !== undefined) {
-    console.warn(
-      `[BasiQ UI] ${componentName} does not support the value attribute. Use v-model or defaultValue instead.`,
-    );
-  }
-
-  onMounted(syncOwningForm);
-  onUpdated(syncOwningForm);
+  onMounted(() => {
+    syncChecked();
+    syncOwningForm();
+  });
+  onUpdated(() => {
+    syncChecked();
+    syncOwningForm();
+  });
   onBeforeUnmount(() => {
     owningForm?.removeEventListener("reset", handleFormReset);
   });
 
-  function handleValueInput(event: Event) {
-    const value = (event.target as Element).value;
-
-    if (!isControlled) internalValue.value = value;
-    emitModelValue(value);
+  function syncChecked() {
+    if (element.value !== null) element.value.checked = currentValue.value;
   }
 
   function syncOwningForm() {
@@ -70,21 +66,36 @@ export function useTextControl<Element extends HTMLInputElement | HTMLTextAreaEl
     owningForm?.addEventListener("reset", handleFormReset);
   }
 
+  function handleCheckedChange(event: Event) {
+    const nextValue = (event.currentTarget as HTMLInputElement).checked;
+
+    if (!isControlled) internalValue.value = nextValue;
+    emitModelValue(nextValue);
+    queueMicrotask(syncChecked);
+
+    return nextValue;
+  }
+
   function handleFormReset(event: Event) {
     queueMicrotask(() => {
-      if (event.defaultPrevented) return;
+      if (event.defaultPrevented) {
+        syncChecked();
+        return;
+      }
 
       if (isControlled) {
         emitModelValue(resetValue);
       } else {
         internalValue.value = resetValue;
       }
+
+      syncChecked();
     });
   }
 
   return {
     currentValue,
-    handleValueInput,
+    handleCheckedChange,
     resolveAriaDescribedBy,
     resolveAriaInvalid,
     resolveInvalid,

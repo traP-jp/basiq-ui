@@ -117,3 +117,22 @@
   color: var(--basiq-color-content-default);
   background: var(--basiq-color-surface-base);
 }
+
+.basiq-selection-surfaces {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+
+.basiq-selection-surface {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  padding: 1.5rem;
+  border-radius: var(--basiq-radius-md);
+}
+
+.basiq-selection-surface h2 {
+  margin: 0;
+  font-size: 0.875rem;
+}

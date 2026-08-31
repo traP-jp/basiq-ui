@@ -6,7 +6,6 @@ import { useTextControl } from "../text-control/useTextControl";
 defineOptions({ inheritAttrs: false });
 
 export type BasiqTextareaResize = "none" | "vertical";
-export type BasiqTextareaSize = "lg" | "md" | "sm";
 
 export interface BasiqTextareaProps {
   autocomplete?: string;
@@ -25,7 +24,6 @@ export interface BasiqTextareaProps {
   required?: boolean;
   resize?: BasiqTextareaResize;
   rows?: number | string;
-  size?: BasiqTextareaSize;
   wrap?: "hard" | "soft";
 }
 
@@ -44,7 +42,6 @@ const props = withDefaults(defineProps<BasiqTextareaProps>(), {
   required: undefined,
   resize: "vertical",
   rows: 3,
-  size: "md",
 });
 const emit = defineEmits<BasiqTextareaEmits>();
 const textareaElement = useTemplateRef<HTMLTextAreaElement>("textarea");
@@ -92,7 +89,6 @@ function handleBlur(event: FocusEvent) {
     :autocomplete="autocomplete"
     :data-invalid="resolveInvalid() ? '' : undefined"
     :data-resize="resize"
-    :data-size="size"
     :disabled="disabled"
     :form="form"
     :inputmode="inputmode"
@@ -127,14 +123,6 @@ function handleBlur(event: FocusEvent) {
   font-size: 1rem;
   line-height: 1.5;
   resize: vertical;
-}
-
-.root[data-size="sm"] {
-  padding-block: var(--basiq-space-100);
-}
-
-.root[data-size="lg"] {
-  padding-block: var(--basiq-space-300);
 }
 
 .root[data-resize="none"] {

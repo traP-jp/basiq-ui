@@ -52,11 +52,44 @@ const describedBy = computed(() => {
 
   return value || undefined;
 });
+const registeredControls = new Map<symbol, string>();
+let hasWarnedAboutMultipleControls = false;
+let warningScheduled = false;
+
+function registerControl(componentName: string) {
+  if (!import.meta.env.DEV) return () => {};
+
+  const registration = Symbol(componentName);
+
+  registeredControls.set(registration, componentName);
+  scheduleMultipleControlsWarning();
+
+  return () => {
+    registeredControls.delete(registration);
+    if (registeredControls.size <= 1) hasWarnedAboutMultipleControls = false;
+  };
+}
+
+function scheduleMultipleControlsWarning() {
+  if (warningScheduled) return;
+
+  warningScheduled = true;
+  queueMicrotask(() => {
+    warningScheduled = false;
+    if (hasWarnedAboutMultipleControls || registeredControls.size <= 1) return;
+
+    hasWarnedAboutMultipleControls = true;
+    console.warn(
+      `[BasiQ UI] BasiqFormField supports one logical control. Multiple controls were registered: ${Array.from(registeredControls.values()).join(", ")}. Use a group component for multiple controls.`,
+    );
+  });
+}
 
 provide(basiqFormFieldContextKey, {
   controlId: resolvedControlId,
   describedBy,
   invalid,
+  registerControl,
   required,
 });
 </script>

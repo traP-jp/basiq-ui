@@ -132,16 +132,11 @@ const meta = {
     required: false,
     resize: "vertical",
     rows: 3,
-    size: "md",
   },
   argTypes: {
     resize: {
       control: "select",
       options: ["none", "vertical"],
-    },
-    size: {
-      control: "select",
-      options: ["sm", "md", "lg"],
     },
   },
   render: (args) => ({
@@ -220,32 +215,6 @@ export const Disabled: Story = {
     const canvas = within(canvasElement);
 
     await expect(canvas.getByRole("textbox", { name: "入力内容" })).toBeDisabled();
-  },
-};
-
-export const Sizes: Story = {
-  render: () => ({
-    components: { BasiqTextarea },
-    template: `
-      <div class="basiq-story basiq-form-story" style="max-width: 24rem">
-        <BasiqTextarea aria-label="Small" default-value="sm" size="sm" />
-        <BasiqTextarea aria-label="Medium" default-value="md" size="md" />
-        <BasiqTextarea aria-label="Large" default-value="lg" size="lg" />
-      </div>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const small = canvas.getByRole("textbox", { name: "Small" });
-    const medium = canvas.getByRole("textbox", { name: "Medium" });
-    const large = canvas.getByRole("textbox", { name: "Large" });
-
-    await expect(small.getBoundingClientRect().height).toBeLessThan(
-      medium.getBoundingClientRect().height,
-    );
-    await expect(medium.getBoundingClientRect().height).toBeLessThan(
-      large.getBoundingClientRect().height,
-    );
   },
 };
 

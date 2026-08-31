@@ -20,6 +20,49 @@
   --basiq-color-border-control: #8795a3;
   --basiq-color-control-background-disabled: #d7dde2;
   --basiq-color-control-background-disabled-accent: #d4e6f1;
+  --basiq-color-checkbox-background-unchecked-rest: var(--basiq-color-surface-container);
+  --basiq-color-checkbox-background-unchecked-hover: var(--basiq-color-surface-muted);
+  --basiq-color-checkbox-background-unchecked-pressed: #d7dde2;
+  --basiq-color-checkbox-background-checked-rest: var(--basiq-color-accent-default);
+  --basiq-color-checkbox-background-checked-hover: #1565b1;
+  --basiq-color-checkbox-background-checked-pressed: #195fa3;
+  --basiq-color-checkbox-background-unchecked-disabled: var(
+    --basiq-color-control-background-disabled
+  );
+  --basiq-color-checkbox-background-checked-disabled: var(
+    --basiq-color-control-background-disabled-accent
+  );
+  --basiq-color-checkbox-border-unchecked-rest: #748390;
+  --basiq-color-checkbox-border-unchecked-hover: var(--basiq-color-accent-default);
+  --basiq-color-checkbox-border-checked-rest: var(--basiq-color-accent-default);
+  --basiq-color-checkbox-border-checked-hover: #1565b1;
+  --basiq-color-checkbox-border-checked-pressed: #195fa3;
+  --basiq-color-checkbox-border-unchecked-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-checkbox-border-checked-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-checkbox-border-invalid: var(--basiq-color-content-danger);
+  --basiq-color-checkbox-indicator: var(--basiq-color-content-on-accent);
+  --basiq-color-checkbox-indicator-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-switch-track-off-rest: #748390;
+  --basiq-color-switch-track-off-hover: #6b7d8a;
+  --basiq-color-switch-track-off-pressed: #617482;
+  --basiq-color-switch-track-on-rest: var(--basiq-color-accent-default);
+  --basiq-color-switch-track-on-hover: #1565b1;
+  --basiq-color-switch-track-on-pressed: #195fa3;
+  --basiq-color-switch-track-off-disabled: var(--basiq-color-control-background-disabled);
+  --basiq-color-switch-track-on-disabled: var(--basiq-color-control-background-disabled-accent);
+  --basiq-color-switch-thumb-rest: var(--basiq-color-content-on-neutral);
+  --basiq-color-switch-thumb-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-radio-background-rest: var(--basiq-color-surface-container);
+  --basiq-color-radio-background-hover: var(--basiq-color-surface-muted);
+  --basiq-color-radio-background-pressed: #d7dde2;
+  --basiq-color-radio-background-disabled: var(--basiq-color-control-background-disabled);
+  --basiq-color-radio-border-unchecked-rest: #748390;
+  --basiq-color-radio-border-hover: var(--basiq-color-accent-default);
+  --basiq-color-radio-border-checked-rest: var(--basiq-color-accent-default);
+  --basiq-color-radio-border-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-radio-border-invalid: var(--basiq-color-content-danger);
+  --basiq-color-radio-indicator: var(--basiq-color-accent-default);
+  --basiq-color-radio-indicator-disabled: var(--basiq-color-content-disabled);
   --basiq-color-text-control-background: var(--basiq-color-surface-container);
   --basiq-color-text-control-background-disabled: var(--basiq-color-control-background-disabled);
   --basiq-color-text-control-border: var(--basiq-color-border-control);
@@ -95,6 +138,49 @@
   --basiq-color-border-control: #bac2c9;
   --basiq-color-control-background-disabled: #333d46;
   --basiq-color-control-background-disabled-accent: #304655;
+  --basiq-color-checkbox-background-unchecked-rest: var(--basiq-color-surface-container);
+  --basiq-color-checkbox-background-unchecked-hover: #3a424b;
+  --basiq-color-checkbox-background-unchecked-pressed: #474f56;
+  --basiq-color-checkbox-background-checked-rest: var(--basiq-color-accent-default);
+  --basiq-color-checkbox-background-checked-hover: #5aa3fa;
+  --basiq-color-checkbox-background-checked-pressed: #6dadfa;
+  --basiq-color-checkbox-background-unchecked-disabled: var(
+    --basiq-color-control-background-disabled
+  );
+  --basiq-color-checkbox-background-checked-disabled: var(
+    --basiq-color-control-background-disabled-accent
+  );
+  --basiq-color-checkbox-border-unchecked-rest: var(--basiq-color-border-control);
+  --basiq-color-checkbox-border-unchecked-hover: var(--basiq-color-accent-default);
+  --basiq-color-checkbox-border-checked-rest: var(--basiq-color-accent-default);
+  --basiq-color-checkbox-border-checked-hover: #5aa3fa;
+  --basiq-color-checkbox-border-checked-pressed: #6dadfa;
+  --basiq-color-checkbox-border-unchecked-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-checkbox-border-checked-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-checkbox-border-invalid: var(--basiq-color-content-danger);
+  --basiq-color-checkbox-indicator: var(--basiq-color-content-on-accent);
+  --basiq-color-checkbox-indicator-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-switch-track-off-rest: #6b7d8a;
+  --basiq-color-switch-track-off-hover: #748692;
+  --basiq-color-switch-track-off-pressed: #7d8f9b;
+  --basiq-color-switch-track-on-rest: var(--basiq-color-accent-default);
+  --basiq-color-switch-track-on-hover: #5aa3fa;
+  --basiq-color-switch-track-on-pressed: #6dadfa;
+  --basiq-color-switch-track-off-disabled: var(--basiq-color-control-background-disabled);
+  --basiq-color-switch-track-on-disabled: var(--basiq-color-control-background-disabled-accent);
+  --basiq-color-switch-thumb-rest: var(--basiq-color-content-on-neutral);
+  --basiq-color-switch-thumb-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-radio-background-rest: var(--basiq-color-surface-container);
+  --basiq-color-radio-background-hover: #3a424b;
+  --basiq-color-radio-background-pressed: #474f56;
+  --basiq-color-radio-background-disabled: var(--basiq-color-control-background-disabled);
+  --basiq-color-radio-border-unchecked-rest: var(--basiq-color-border-control);
+  --basiq-color-radio-border-hover: var(--basiq-color-accent-default);
+  --basiq-color-radio-border-checked-rest: var(--basiq-color-accent-default);
+  --basiq-color-radio-border-disabled: var(--basiq-color-content-disabled);
+  --basiq-color-radio-border-invalid: var(--basiq-color-content-danger);
+  --basiq-color-radio-indicator: var(--basiq-color-accent-default);
+  --basiq-color-radio-indicator-disabled: var(--basiq-color-content-disabled);
   --basiq-color-text-control-background: var(--basiq-color-surface-container);
   --basiq-color-text-control-background-disabled: var(--basiq-color-control-background-disabled);
   --basiq-color-text-control-border: var(--basiq-color-border-control);
@@ -172,6 +258,49 @@
     --basiq-color-border-control: #bac2c9;
     --basiq-color-control-background-disabled: #333d46;
     --basiq-color-control-background-disabled-accent: #304655;
+    --basiq-color-checkbox-background-unchecked-rest: var(--basiq-color-surface-container);
+    --basiq-color-checkbox-background-unchecked-hover: #3a424b;
+    --basiq-color-checkbox-background-unchecked-pressed: #474f56;
+    --basiq-color-checkbox-background-checked-rest: var(--basiq-color-accent-default);
+    --basiq-color-checkbox-background-checked-hover: #5aa3fa;
+    --basiq-color-checkbox-background-checked-pressed: #6dadfa;
+    --basiq-color-checkbox-background-unchecked-disabled: var(
+      --basiq-color-control-background-disabled
+    );
+    --basiq-color-checkbox-background-checked-disabled: var(
+      --basiq-color-control-background-disabled-accent
+    );
+    --basiq-color-checkbox-border-unchecked-rest: var(--basiq-color-border-control);
+    --basiq-color-checkbox-border-unchecked-hover: var(--basiq-color-accent-default);
+    --basiq-color-checkbox-border-checked-rest: var(--basiq-color-accent-default);
+    --basiq-color-checkbox-border-checked-hover: #5aa3fa;
+    --basiq-color-checkbox-border-checked-pressed: #6dadfa;
+    --basiq-color-checkbox-border-unchecked-disabled: var(--basiq-color-content-disabled);
+    --basiq-color-checkbox-border-checked-disabled: var(--basiq-color-content-disabled);
+    --basiq-color-checkbox-border-invalid: var(--basiq-color-content-danger);
+    --basiq-color-checkbox-indicator: var(--basiq-color-content-on-accent);
+    --basiq-color-checkbox-indicator-disabled: var(--basiq-color-content-disabled);
+    --basiq-color-switch-track-off-rest: #6b7d8a;
+    --basiq-color-switch-track-off-hover: #748692;
+    --basiq-color-switch-track-off-pressed: #7d8f9b;
+    --basiq-color-switch-track-on-rest: var(--basiq-color-accent-default);
+    --basiq-color-switch-track-on-hover: #5aa3fa;
+    --basiq-color-switch-track-on-pressed: #6dadfa;
+    --basiq-color-switch-track-off-disabled: var(--basiq-color-control-background-disabled);
+    --basiq-color-switch-track-on-disabled: var(--basiq-color-control-background-disabled-accent);
+    --basiq-color-switch-thumb-rest: var(--basiq-color-content-on-neutral);
+    --basiq-color-switch-thumb-disabled: var(--basiq-color-content-disabled);
+    --basiq-color-radio-background-rest: var(--basiq-color-surface-container);
+    --basiq-color-radio-background-hover: #3a424b;
+    --basiq-color-radio-background-pressed: #474f56;
+    --basiq-color-radio-background-disabled: var(--basiq-color-control-background-disabled);
+    --basiq-color-radio-border-unchecked-rest: var(--basiq-color-border-control);
+    --basiq-color-radio-border-hover: var(--basiq-color-accent-default);
+    --basiq-color-radio-border-checked-rest: var(--basiq-color-accent-default);
+    --basiq-color-radio-border-disabled: var(--basiq-color-content-disabled);
+    --basiq-color-radio-border-invalid: var(--basiq-color-content-danger);
+    --basiq-color-radio-indicator: var(--basiq-color-accent-default);
+    --basiq-color-radio-indicator-disabled: var(--basiq-color-content-disabled);
     --basiq-color-text-control-background: var(--basiq-color-surface-container);
     --basiq-color-text-control-background-disabled: var(--basiq-color-control-background-disabled);
     --basiq-color-text-control-border: var(--basiq-color-border-control);
