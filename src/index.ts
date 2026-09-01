@@ -41,6 +41,27 @@ export type {
 } from "./components/radio-group/BasiqRadioGroup.vue";
 export { default as BasiqSwitch } from "./components/switch/BasiqSwitch.vue";
 export type { BasiqSwitchEmits, BasiqSwitchProps } from "./components/switch/BasiqSwitch.vue";
+export { default as BasiqTabs } from "./components/tabs/BasiqTabs.vue";
+export type {
+  BasiqTabsEmits,
+  BasiqTabsItem,
+  BasiqTabsItemSlotProps,
+  BasiqTabsProps,
+} from "./components/tabs/BasiqTabs.vue";
+export { default as BasiqTabsContent } from "./components/tabs/BasiqTabsContent.vue";
+export type { BasiqTabsContentProps } from "./components/tabs/BasiqTabsContent.vue";
+export { default as BasiqTabsList } from "./components/tabs/BasiqTabsList.vue";
+export type { BasiqTabsListProps } from "./components/tabs/BasiqTabsList.vue";
+export { default as BasiqTabsRoot } from "./components/tabs/BasiqTabsRoot.vue";
+export type {
+  BasiqTabsActivationMode,
+  BasiqTabsOrientation,
+  BasiqTabsRootEmits,
+  BasiqTabsRootProps,
+  BasiqTabsRootSlotProps,
+} from "./components/tabs/BasiqTabsRoot.vue";
+export { default as BasiqTabsTrigger } from "./components/tabs/BasiqTabsTrigger.vue";
+export type { BasiqTabsTriggerProps } from "./components/tabs/BasiqTabsTrigger.vue";
 export { default as BasiqTextarea } from "./components/textarea/BasiqTextarea.vue";
 export type {
   BasiqTextareaEmits,
