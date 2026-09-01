@@ -291,6 +291,105 @@ export const ControlledUpdateRejected: Story = {
   },
 };
 
+export const ControlledEmptyUpdateRejected: Story = {
+  args: {
+    ariaLabel: "設定",
+    items: settingsItems,
+    modelValue: null,
+  },
+  render: (args) => ({
+    components: { BasiqTabs },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story" style="max-width: 32rem">
+        <BasiqTabs v-bind="args">
+          <template #trigger="{ item, selected }">
+            <span :data-selected="String(selected)">{{ item.label }}</span>
+          </template>
+        </BasiqTabs>
+      </div>
+    `,
+  }),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    const profile = canvas.getByRole("tab", { name: "プロフィール" });
+    const account = canvas.getByRole("tab", { name: "アカウント" });
+
+    await expect(profile).toHaveAttribute("aria-selected", "false");
+    await expect(account).toHaveAttribute("aria-selected", "false");
+    await expect(canvas.queryByRole("tabpanel")).not.toBeInTheDocument();
+
+    await userEvent.click(account);
+    await expect(args["onUpdate:modelValue"]).toHaveBeenCalledWith("account");
+    await expect(profile).toHaveAttribute("aria-selected", "false");
+    await expect(account).toHaveAttribute("aria-selected", "false");
+    await expect(account.firstElementChild).toHaveAttribute("data-selected", "false");
+    await expect(canvas.queryByRole("tabpanel")).not.toBeInTheDocument();
+  },
+};
+
+const ReactiveItemsTabsHarness = defineComponent({
+  name: "ReactiveItemsTabsHarness",
+  components: { BasiqTabs },
+  setup() {
+    const items = ref<BasiqTabsItem[]>(settingsItems.map((item) => ({ ...item })));
+
+    function disableAccount() {
+      items.value = items.value.map((item) =>
+        item.value === "account" ? { ...item, disabled: true } : item,
+      );
+    }
+
+    function removeProfile() {
+      items.value = items.value.filter((item) => item.value !== "profile");
+    }
+
+    return { disableAccount, items, removeProfile };
+  },
+  template: `
+    <div class="basiq-story" style="max-width: 32rem">
+      <div style="display: flex; gap: 8px; margin-bottom: 16px">
+        <button type="button" @click="disableAccount">選択中を無効化</button>
+        <button type="button" @click="removeProfile">プロフィールを削除</button>
+      </div>
+      <BasiqTabs :items="items" default-value="account" aria-label="動的な設定" />
+    </div>
+  `,
+});
+
+export const ReactiveItems: Story = {
+  render: () => ({
+    components: { ReactiveItemsTabsHarness },
+    template: "<ReactiveItemsTabsHarness />",
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getByRole("tab", { name: "アカウント" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    await userEvent.click(canvas.getByRole("button", { name: "選択中を無効化" }));
+    await expect(canvas.getByRole("tab", { name: "プロフィール" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(canvas.getByRole("tabpanel")).toHaveTextContent(
+      "プロフィールと表示名を編集できます。",
+    );
+
+    await userEvent.click(canvas.getByRole("button", { name: "プロフィールを削除" }));
+    await expect(canvas.getByRole("tab", { name: "通知" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(canvas.getByRole("tabpanel")).toHaveTextContent(
+      "通知の受け取り方を変更できます。",
+    );
+  },
+};
+
 export const PersistentContent: Story = {
   args: {
     ariaLabel: "設定",
@@ -348,5 +447,42 @@ export const HorizontalOverflow: Story = {
     const tabList = within(canvasElement).getByRole("tablist", { name: "管理画面" });
 
     await expect(tabList.scrollWidth).toBeGreaterThan(tabList.clientWidth);
+  },
+};
+
+export const VerticalNarrow: Story = {
+  args: {
+    ariaLabel: "設定",
+    items: [
+      ...settingsItems,
+      {
+        content: "アプリケーション全体のアクセシビリティ設定を変更できます。",
+        label: "アクセシビリティとキーボード操作",
+        value: "accessibility",
+      },
+    ],
+    orientation: "vertical",
+  },
+  render: (args) => ({
+    components: { BasiqTabs },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story">
+        <div style="width: 17.5rem; max-width: 100%">
+          <BasiqTabs v-bind="args" />
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const tabList = canvas.getByRole("tablist", { name: "設定" });
+    const panel = canvas.getByRole("tabpanel");
+    const root = tabList.parentElement;
+
+    if (root === null) throw new Error("Tabs root was not rendered.");
+
+    await expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);
+    await expect(panel.getBoundingClientRect().width).toBeGreaterThanOrEqual(120);
   },
 };

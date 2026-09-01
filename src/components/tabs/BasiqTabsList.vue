@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TabsList } from "reka-ui";
+import { useAttrs } from "vue";
 
 export interface BasiqTabsListProps {
   loop?: boolean;
@@ -8,6 +9,19 @@ export interface BasiqTabsListProps {
 withDefaults(defineProps<BasiqTabsListProps>(), {
   loop: true,
 });
+
+const attrs = useAttrs();
+const ariaLabel = attrs["aria-label"];
+const ariaLabelledby = attrs["aria-labelledby"];
+const hasAccessibleName = [ariaLabel, ariaLabelledby].some(
+  (value) => typeof value === "string" && value.trim().length > 0,
+);
+
+if (import.meta.env.DEV && !hasAccessibleName) {
+  console.warn(
+    "[BasiQ UI] BasiqTabsList requires an accessible name. Pass ariaLabel/ariaLabelledby to BasiqTabs, or aria-label/aria-labelledby to BasiqTabsList.",
+  );
+}
 </script>
 
 <template>
@@ -35,9 +49,10 @@ withDefaults(defineProps<BasiqTabsListProps>(), {
 
 .root[data-orientation="vertical"] {
   flex-direction: column;
+  flex: 0 1 auto;
   align-items: stretch;
   width: max-content;
-  min-width: min(10rem, 100%);
-  max-width: min(15rem, 100%);
+  min-width: 0;
+  max-width: min(15rem, 50%);
 }
 </style>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { TabsRoot } from "reka-ui";
-
-import { hasInitialProp } from "../controllable-state/hasInitialProp";
+import { computed, watchEffect } from "vue";
 
 export type BasiqTabsActivationMode = "automatic" | "manual";
 export type BasiqTabsOrientation = "horizontal" | "vertical";
@@ -9,7 +8,7 @@ export type BasiqTabsOrientation = "horizontal" | "vertical";
 export interface BasiqTabsRootProps {
   activationMode?: BasiqTabsActivationMode;
   defaultValue?: string;
-  modelValue?: string;
+  modelValue?: string | null;
   orientation?: BasiqTabsOrientation;
   unmountOnHide?: boolean;
 }
@@ -19,7 +18,7 @@ export interface BasiqTabsRootEmits {
 }
 
 export interface BasiqTabsRootSlotProps {
-  modelValue: string | undefined;
+  modelValue: string | null | undefined;
 }
 
 const props = withDefaults(defineProps<BasiqTabsRootProps>(), {
@@ -33,13 +32,29 @@ defineSlots<{
   default?: (props: BasiqTabsRootSlotProps) => unknown;
 }>();
 
-const hasModelValue = hasInitialProp("modelValue");
+const isInitiallyControlled = props.modelValue !== undefined;
+// Reka UI treats only undefined as uncontrolled. null keeps an intentionally empty model controlled.
+const rekaModelValue = computed(
+  () => props.modelValue as Exclude<BasiqTabsRootProps["modelValue"], null>,
+);
 
-if (import.meta.env.DEV && !hasModelValue && props.defaultValue === undefined) {
+if (import.meta.env.DEV && !isInitiallyControlled && props.defaultValue === undefined) {
   console.warn(
     "[BasiQ UI] BasiqTabsRoot requires modelValue or defaultValue so that one tab is selected.",
   );
 }
+
+watchEffect(() => {
+  if (!import.meta.env.DEV) return;
+
+  const isControlled = props.modelValue !== undefined;
+
+  if (isControlled !== isInitiallyControlled) {
+    console.warn(
+      "[BasiQ UI] BasiqTabsRoot must not switch between controlled and uncontrolled state. Use null for a controlled empty value.",
+    );
+  }
+});
 </script>
 
 <template>
@@ -47,7 +62,7 @@ if (import.meta.env.DEV && !hasModelValue && props.defaultValue === undefined) {
     :activation-mode="activationMode"
     :class="$style.root"
     :default-value="defaultValue"
-    :model-value="modelValue"
+    :model-value="rekaModelValue"
     :orientation="orientation"
     :unmount-on-hide="unmountOnHide"
     @update:model-value="$emit('update:modelValue', $event)"

@@ -16,7 +16,7 @@ const items = [
 describe("BasiqTabs SSR", () => {
   it("selects the first enabled item when no initial value is provided", async () => {
     const Root = defineComponent({
-      setup: () => () => h(BasiqTabs, { items }),
+      setup: () => () => h(BasiqTabs, { ariaLabel: "設定", items }),
     });
     const html = await renderToString(createSSRApp(Root));
 
@@ -30,6 +30,7 @@ describe("BasiqTabs SSR", () => {
     const Root = defineComponent({
       setup: () => () =>
         h(BasiqTabs, {
+          ariaLabel: "設定",
           items: [{ ...items[0], disabled: true }, items[1]],
         }),
     });
@@ -44,6 +45,7 @@ describe("BasiqTabs SSR", () => {
     const Root = defineComponent({
       setup: () => () =>
         h(BasiqTabs, {
+          ariaLabel: "設定",
           items,
           modelValue: "account",
           "onUpdate:modelValue": emit,
@@ -54,6 +56,26 @@ describe("BasiqTabs SSR", () => {
     expect(html).toContain("アカウント本文");
     expect(html).not.toContain("プロフィール本文");
     expect(emit).not.toHaveBeenCalled();
+  });
+
+  it("keeps a controlled null value unselected", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    try {
+      const Root = defineComponent({
+        setup: () => () => h(BasiqTabs, { ariaLabel: "設定", items, modelValue: null }),
+      });
+      const html = await renderToString(createSSRApp(Root));
+
+      expect(html).not.toContain('aria-selected="true"');
+      expect(html).not.toContain("プロフィール本文");
+      expect(html).not.toContain("アカウント本文");
+      expect(warn).toHaveBeenCalledWith(
+        "[BasiQ UI] BasiqTabs has enabled items but modelValue is null.",
+      );
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it("supports naming the tab list with a visible heading", async () => {
@@ -76,6 +98,7 @@ describe("BasiqTabs SSR", () => {
     const Root = defineComponent({
       setup: () => () =>
         h(BasiqTabs, {
+          ariaLabel: "設定",
           defaultValue: "profile",
           items,
           unmountOnHide: false,
@@ -106,5 +129,28 @@ describe("BasiqTabs SSR", () => {
     expect(html).toContain('aria-label="設定"');
     expect(html).toContain('role="tabpanel"');
     expect(html).toContain("プロフィール本文");
+  });
+
+  it("warns when the compound tab list has no accessible name", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    try {
+      const Root = defineComponent({
+        setup: () => () =>
+          h(BasiqTabsRoot, { defaultValue: "profile" }, () => [
+            h(BasiqTabsList, null, () => [
+              h(BasiqTabsTrigger, { value: "profile" }, () => "プロフィール"),
+            ]),
+            h(BasiqTabsContent, { value: "profile" }, () => "プロフィール本文"),
+          ]),
+      });
+
+      await renderToString(createSSRApp(Root));
+      expect(warn).toHaveBeenCalledWith(
+        "[BasiQ UI] BasiqTabsList requires an accessible name. Pass ariaLabel/ariaLabelledby to BasiqTabs, or aria-label/aria-labelledby to BasiqTabsList.",
+      );
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
