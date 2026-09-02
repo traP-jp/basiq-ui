@@ -116,6 +116,19 @@
   --basiq-color-choice-group-item-background-selected-rest: #126abf1a;
   --basiq-color-choice-group-item-background-selected-hover: #126abf1a;
   --basiq-color-choice-group-item-background-selected-pressed: #126abf33;
+  --basiq-color-tabs-trigger-content-unselected-rest: var(--basiq-color-content-subtle);
+  --basiq-color-tabs-trigger-content-unselected-hover: var(--basiq-color-content-default);
+  --basiq-color-tabs-trigger-content-unselected-pressed: var(--basiq-color-content-default);
+  --basiq-color-tabs-trigger-content-selected-rest: var(--basiq-color-content-accent);
+  --basiq-color-tabs-trigger-content-selected-hover: #1565b1;
+  --basiq-color-tabs-trigger-content-selected-pressed: #195fa3;
+  --basiq-color-tabs-trigger-background-unselected-rest: transparent;
+  --basiq-color-tabs-trigger-background-unselected-hover: var(--basiq-color-surface-muted);
+  --basiq-color-tabs-trigger-background-unselected-pressed: #d7dde2;
+  --basiq-color-tabs-trigger-background-selected-rest: #126abf1a;
+  --basiq-color-tabs-trigger-background-selected-hover: #126abf24;
+  --basiq-color-tabs-trigger-background-selected-pressed: #126abf33;
+  --basiq-color-tabs-content-background: var(--basiq-color-surface-container);
 }
 
 [data-basiq-theme="dark"] {
@@ -234,6 +247,19 @@
   --basiq-color-choice-group-item-background-selected-rest: #4899f91a;
   --basiq-color-choice-group-item-background-selected-hover: #4899f91a;
   --basiq-color-choice-group-item-background-selected-pressed: #4899f933;
+  --basiq-color-tabs-trigger-content-unselected-rest: var(--basiq-color-content-subtle);
+  --basiq-color-tabs-trigger-content-unselected-hover: var(--basiq-color-content-default);
+  --basiq-color-tabs-trigger-content-unselected-pressed: var(--basiq-color-content-default);
+  --basiq-color-tabs-trigger-content-selected-rest: #5aa3fa;
+  --basiq-color-tabs-trigger-content-selected-hover: #6dadfa;
+  --basiq-color-tabs-trigger-content-selected-pressed: #6dadfa;
+  --basiq-color-tabs-trigger-background-unselected-rest: transparent;
+  --basiq-color-tabs-trigger-background-unselected-hover: #3a424b;
+  --basiq-color-tabs-trigger-background-unselected-pressed: #474f56;
+  --basiq-color-tabs-trigger-background-selected-rest: #4899f91a;
+  --basiq-color-tabs-trigger-background-selected-hover: #4899f924;
+  --basiq-color-tabs-trigger-background-selected-pressed: #4899f92e;
+  --basiq-color-tabs-content-background: var(--basiq-color-surface-container);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -354,5 +380,18 @@
     --basiq-color-choice-group-item-background-selected-rest: #4899f91a;
     --basiq-color-choice-group-item-background-selected-hover: #4899f91a;
     --basiq-color-choice-group-item-background-selected-pressed: #4899f933;
+    --basiq-color-tabs-trigger-content-unselected-rest: var(--basiq-color-content-subtle);
+    --basiq-color-tabs-trigger-content-unselected-hover: var(--basiq-color-content-default);
+    --basiq-color-tabs-trigger-content-unselected-pressed: var(--basiq-color-content-default);
+    --basiq-color-tabs-trigger-content-selected-rest: #5aa3fa;
+    --basiq-color-tabs-trigger-content-selected-hover: #6dadfa;
+    --basiq-color-tabs-trigger-content-selected-pressed: #6dadfa;
+    --basiq-color-tabs-trigger-background-unselected-rest: transparent;
+    --basiq-color-tabs-trigger-background-unselected-hover: #3a424b;
+    --basiq-color-tabs-trigger-background-unselected-pressed: #474f56;
+    --basiq-color-tabs-trigger-background-selected-rest: #4899f91a;
+    --basiq-color-tabs-trigger-background-selected-hover: #4899f924;
+    --basiq-color-tabs-trigger-background-selected-pressed: #4899f92e;
+    --basiq-color-tabs-content-background: var(--basiq-color-surface-container);
   }
 }
