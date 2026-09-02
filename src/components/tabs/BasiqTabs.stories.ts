@@ -2,6 +2,11 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  controlsDisabledStoryParameters,
+} from "../../stories/storybook-parameters";
 import BasiqTabs, { type BasiqTabsItem } from "./BasiqTabs.vue";
 import BasiqTabsContent from "./BasiqTabsContent.vue";
 import BasiqTabsList from "./BasiqTabsList.vue";
@@ -35,11 +40,44 @@ const meta = {
     BasiqTabsRoot,
     BasiqTabsTrigger,
   },
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
+    activationMode: "automatic",
     ariaLabel: "設定",
+    dir: "ltr",
     items: settingsItems,
+    loop: true,
     "onUpdate:modelValue": fn(),
+    orientation: "horizontal",
+    unmountOnHide: true,
+  },
+  argTypes: {
+    activationMode: {
+      control: "inline-radio",
+      options: ["automatic", "manual"],
+    },
+    dir: {
+      control: "inline-radio",
+      options: ["ltr", "rtl"],
+    },
+    orientation: {
+      control: "inline-radio",
+      options: ["horizontal", "vertical"],
+    },
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: [
+        "activationMode",
+        "ariaLabel",
+        "dir",
+        "items",
+        "loop",
+        "orientation",
+        "unmountOnHide",
+      ],
+    },
   },
 } satisfies Meta<typeof BasiqTabs>;
 
@@ -47,11 +85,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const ItemsApi: Story = {
-  args: {
-    ariaLabel: "設定",
-    items: settingsItems,
-  },
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),
@@ -61,6 +96,44 @@ export const ItemsApi: Story = {
       </div>
     `,
   }),
+};
+
+export const ItemsApi: Story = {
+  name: "Items API",
+  args: {
+    ariaLabel: "設定",
+    items: settingsItems,
+  },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+      { content: "通知の受け取り方を変更できます。", label: "通知", value: "notifications" },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs aria-label="設定" :items="items" />
+    </template>
+  `),
+  render: (args) => ({
+    components: { BasiqTabs },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story" style="max-width: 32rem">
+        <BasiqTabs v-bind="args" />
+      </div>
+    `,
+  }),
+};
+
+export const ItemsApiInteraction: Story = {
+  ...ItemsApi,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
     const profile = canvas.getByRole("tab", { name: "プロフィール" });
@@ -85,6 +158,35 @@ export const ItemsApi: Story = {
 };
 
 export const CompoundApi: Story = {
+  name: "Compound API",
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import {
+      BasiqTabsContent,
+      BasiqTabsList,
+      BasiqTabsRoot,
+      BasiqTabsTrigger,
+    } from "basiq-ui";
+    </script>
+
+    <template>
+      <BasiqTabsRoot default-value="profile">
+        <BasiqTabsList aria-label="設定">
+          <BasiqTabsTrigger value="profile">プロフィール</BasiqTabsTrigger>
+          <BasiqTabsTrigger value="account">アカウント</BasiqTabsTrigger>
+        </BasiqTabsList>
+
+        <BasiqTabsContent value="profile">
+          <h3>プロフィール</h3>
+          <p>表示名やプロフィール画像を変更できます。</p>
+        </BasiqTabsContent>
+        <BasiqTabsContent value="account">
+          <h3>アカウント</h3>
+          <p>ログイン方法とセッションを管理できます。</p>
+        </BasiqTabsContent>
+      </BasiqTabsRoot>
+    </template>
+  `),
   render: () => ({
     components: {
       BasiqTabsContent,
@@ -112,6 +214,12 @@ export const CompoundApi: Story = {
       </div>
     `,
   }),
+};
+
+export const CompoundApiInteraction: Story = {
+  ...CompoundApi,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const profile = canvas.getByRole("tab", { name: "プロフィール" });
@@ -141,6 +249,26 @@ export const Vertical: Story = {
     ],
     orientation: "vertical",
   },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+      { content: "通知の受け取り方を変更できます。", label: "通知", value: "notifications" },
+      {
+        content: "アプリケーション全体のアクセシビリティ設定を変更できます。",
+        label: "アクセシビリティとキーボード操作",
+        value: "accessibility",
+      },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs aria-label="設定" :items="items" orientation="vertical" />
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),
@@ -150,6 +278,12 @@ export const Vertical: Story = {
       </div>
     `,
   }),
+};
+
+export const VerticalInteraction: Story = {
+  ...Vertical,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const tabList = canvas.getByRole("tablist", { name: "設定" });
@@ -168,6 +302,8 @@ export const Vertical: Story = {
 };
 
 export const AutomaticActivation: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   args: {
     ariaLabel: "設定",
     items: [settingsItems[0], { ...settingsItems[1], disabled: true }, settingsItems[2]],
@@ -208,6 +344,24 @@ export const ManualActivation: Story = {
     ariaLabel: "設定",
     items: settingsItems,
   },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs
+        activation-mode="manual"
+        aria-label="設定"
+        :items="items"
+      />
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),
@@ -217,6 +371,12 @@ export const ManualActivation: Story = {
       </div>
     `,
   }),
+};
+
+export const ManualActivationInteraction: Story = {
+  ...ManualActivation,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const profile = canvas.getByRole("tab", { name: "プロフィール" });
@@ -239,6 +399,26 @@ export const RightToLeft: Story = {
     items: settingsItems,
     loop: false,
   },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs
+        aria-label="設定"
+        default-value="account"
+        dir="rtl"
+        :items="items"
+        :loop="false"
+      />
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),
@@ -248,6 +428,12 @@ export const RightToLeft: Story = {
       </div>
     `,
   }),
+};
+
+export const RightToLeftInteraction: Story = {
+  ...RightToLeft,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const tabList = canvas.getByRole("tablist", { name: "設定" });
@@ -268,6 +454,25 @@ export const CustomTrigger: Story = {
     ariaLabel: "設定",
     items: settingsItems,
   },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs :items="items" aria-label="設定">
+        <template #trigger="{ item, selected }">
+          <span aria-hidden="true">{{ selected ? "●" : "○" }}</span>
+          <span>{{ item.label }}</span>
+        </template>
+      </BasiqTabs>
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),
@@ -313,10 +518,32 @@ const ControlledTabsHarness = defineComponent({
 });
 
 export const Controlled: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqTabs } from "basiq-ui";
+
+    const selected = ref("profile");
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs v-model="selected" :items="items" aria-label="設定" />
+    </template>
+  `),
   render: () => ({
     components: { ControlledTabsHarness },
     template: "<ControlledTabsHarness />",
   }),
+};
+
+export const ControlledInteraction: Story = {
+  ...Controlled,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const account = canvas.getByRole("tab", { name: "アカウント" });
@@ -327,6 +554,8 @@ export const Controlled: Story = {
 };
 
 export const ControlledUpdateRejected: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   args: {
     ariaLabel: "設定",
     items: settingsItems,
@@ -353,6 +582,8 @@ export const ControlledUpdateRejected: Story = {
 };
 
 export const ControlledUndefinedUpdateRejected: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args, settingsItems }),
@@ -412,6 +643,8 @@ const ReactiveItemsTabsHarness = defineComponent({
 });
 
 export const ReactiveItems: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ReactiveItemsTabsHarness },
     template: "<ReactiveItemsTabsHarness />",
@@ -465,6 +698,8 @@ const InitiallyEmptyTabsHarness = defineComponent({
 });
 
 export const InitiallyEmptyItems: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { InitiallyEmptyTabsHarness },
     template: "<InitiallyEmptyTabsHarness />",
@@ -490,6 +725,31 @@ export const PersistentContent: Story = {
     items: settingsItems.slice(0, 2),
     unmountOnHide: false,
   },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { label: "プロフィール", value: "profile" },
+      { label: "アカウント", value: "account" },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs
+        :items="items"
+        aria-label="設定"
+        :unmount-on-hide="false"
+      >
+        <template #content="{ item }">
+          <label>
+            {{ item.label }}のメモ
+            <input :aria-label="item.label + 'のメモ'" />
+          </label>
+        </template>
+      </BasiqTabs>
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),
@@ -506,6 +766,12 @@ export const PersistentContent: Story = {
       </div>
     `,
   }),
+};
+
+export const PersistentContentInteraction: Story = {
+  ...PersistentContent,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole("textbox", { name: "プロフィールのメモ" });
@@ -528,6 +794,25 @@ export const HorizontalOverflow: Story = {
       { content: "監査ログを確認します。", label: "監査ログ", value: "audit-log" },
     ],
   },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールを編集します。", label: "プロフィール", value: "profile" },
+      { content: "アカウントを管理します。", label: "アカウント", value: "account" },
+      { content: "通知を変更します。", label: "通知", value: "notifications" },
+      { content: "権限を管理します。", label: "権限管理", value: "permissions" },
+      { content: "監査ログを確認します。", label: "監査ログ", value: "audit-log" },
+    ];
+    </script>
+
+    <template>
+      <div style="max-width: 20rem">
+        <BasiqTabs aria-label="管理画面" :items="items" />
+      </div>
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),
@@ -557,6 +842,27 @@ export const VerticalNarrow: Story = {
     ],
     orientation: "vertical",
   },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+      { content: "アクセシビリティ設定を変更できます。", label: "アクセシビリティとキーボード操作", value: "accessibility" },
+    ];
+    </script>
+
+    <template>
+      <div style="width: 17.5rem; max-width: 100%">
+        <BasiqTabs
+          aria-label="設定"
+          :items="items"
+          orientation="vertical"
+        />
+      </div>
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqTabs },
     setup: () => ({ args }),

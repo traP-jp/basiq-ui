@@ -2,6 +2,11 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  createFixedVueSourceParameters,
+  controlsDisabledStoryParameters,
+} from "../../stories/storybook-parameters";
+import BasiqThemeProvider from "../../theme/BasiqThemeProvider.vue";
 import BasiqCheckbox from "../checkbox/BasiqCheckbox.vue";
 import BasiqRadioGroup from "../radio-group/BasiqRadioGroup.vue";
 import BasiqSwitch from "../switch/BasiqSwitch.vue";
@@ -67,7 +72,6 @@ const DynamicAttributesExample = defineComponent({
 const meta = {
   title: "Examples/Selection controls on surfaces",
   component: SelectionControls,
-  tags: ["test"],
 } satisfies Meta<typeof SelectionControls>;
 
 export default meta;
@@ -75,6 +79,30 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const AllSurfaces: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqCheckbox, BasiqRadioGroup, BasiqSwitch } from "basiq-ui";
+
+    const surfaces = ["base", "container", "muted"];
+    </script>
+
+    <template>
+      <section
+        v-for="surface in surfaces"
+        :key="surface"
+        :style="{ background: 'var(--basiq-color-surface-' + surface + ')' }"
+      >
+        <h2>surface/{{ surface }}</h2>
+        <BasiqCheckbox default-value>更新を受け取る</BasiqCheckbox>
+        <BasiqSwitch>通知を有効にする</BasiqSwitch>
+        <BasiqRadioGroup
+          default-value="email"
+          :items="['email', 'push']"
+          label="通知方法"
+        />
+      </section>
+    </template>
+  `),
   render: () => ({
     components: { SelectionControls },
     template: `
@@ -87,7 +115,56 @@ export const AllSurfaces: Story = {
   }),
 };
 
+export const DarkThemeAccessibility: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
+  render: () => ({
+    components: { BasiqThemeProvider, SelectionControls },
+    template: `
+      <BasiqThemeProvider mode="dark">
+        <div class="basiq-story basiq-selection-surfaces">
+          <SelectionControls surface="base" />
+          <SelectionControls surface="container" />
+          <SelectionControls surface="muted" />
+        </div>
+      </BasiqThemeProvider>
+    `,
+  }),
+};
+
 export const DynamicAttributes: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqCheckbox, BasiqRadioGroup, BasiqSwitch } from "basiq-ui";
+
+    const invalid = ref(false);
+    const revision = ref("before");
+
+    function updateAttributes() {
+      invalid.value = true;
+      revision.value = "after";
+    }
+    </script>
+
+    <template>
+      <BasiqCheckbox
+        :aria-invalid="invalid"
+        :aria-label="'Checkbox ' + revision"
+      />
+      <BasiqSwitch
+        :aria-invalid="invalid"
+        :aria-label="'Switch ' + revision"
+      />
+      <BasiqRadioGroup
+        :aria-invalid="invalid"
+        :aria-label="'RadioGroup ' + revision"
+        :items="['email', 'push']"
+      />
+      <button type="button" @click="updateAttributes">属性を更新</button>
+    </template>
+  `),
   render: () => ({
     components: { DynamicAttributesExample },
     template: "<DynamicAttributesExample />",

@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  addComponentAttribute,
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  controlsDisabledStoryParameters,
+} from "../../stories/storybook-parameters";
 import BasiqInput from "./BasiqInput.vue";
 
 const ControlledResetHarness = defineComponent({
@@ -106,7 +112,7 @@ const NativeEventsHarness = defineComponent({
 const meta = {
   title: "Components/Input",
   component: BasiqInput,
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
     defaultValue: "",
     disabled: false,
@@ -127,6 +133,12 @@ const meta = {
       options: ["text", "email", "password", "search", "tel", "url"],
     },
   },
+  parameters: {
+    controls: {
+      disable: true,
+      include: ["disabled", "invalid", "placeholder", "readonly", "required", "size", "type"],
+    },
+  },
   render: (args) => ({
     components: { BasiqInput },
     setup: () => ({ args }),
@@ -142,7 +154,24 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(
+    addComponentAttribute("BasiqInput", "aria-label", '"入力内容"'),
+  ),
+};
+
 export const Default: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqInput aria-label="入力内容" placeholder="入力してください" />
+    </template>
+  `),
+};
+
+export const DefaultInteraction: Story = {
+  ...Default,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole("textbox", { name: "入力内容" });
@@ -155,6 +184,11 @@ export const Default: Story = {
 
 export const Invalid: Story = {
   args: { invalid: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqInput aria-label="入力内容" invalid />
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("textbox", { name: "入力内容" })).toHaveAttribute(
@@ -166,6 +200,11 @@ export const Invalid: Story = {
 
 export const Disabled: Story = {
   args: { disabled: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqInput aria-label="入力内容" disabled />
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("textbox", { name: "入力内容" })).toBeDisabled();
@@ -173,6 +212,13 @@ export const Disabled: Story = {
 };
 
 export const Sizes: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqInput aria-label="Small" default-value="sm / 36px" size="sm" />
+      <BasiqInput aria-label="Medium" default-value="md / 40px" size="md" />
+      <BasiqInput aria-label="Large" default-value="lg / 44px" size="lg" />
+    </template>
+  `),
   render: () => ({
     components: { BasiqInput },
     template: `
@@ -196,6 +242,12 @@ export const Sizes: Story = {
 };
 
 export const AriaInvalidReason: Story = {
+  name: "ARIA invalid reason",
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqInput aria-invalid="grammar" aria-label="入力内容" />
+    </template>
+  `),
   render: () => ({
     components: { BasiqInput },
     template: `
@@ -214,6 +266,8 @@ export const AriaInvalidReason: Story = {
 };
 
 export const ControlledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ControlledResetHarness },
     template: "<ControlledResetHarness />",
@@ -230,6 +284,8 @@ export const ControlledFormReset: Story = {
 };
 
 export const UncontrolledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { UncontrolledResetHarness },
     template: "<UncontrolledResetHarness />",
@@ -246,6 +302,8 @@ export const UncontrolledFormReset: Story = {
 };
 
 export const CanceledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { CanceledResetHarness },
     template: "<CanceledResetHarness />",
@@ -262,6 +320,8 @@ export const CanceledFormReset: Story = {
 };
 
 export const DynamicAria: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { DynamicAriaHarness },
     template: "<DynamicAriaHarness />",
@@ -279,6 +339,8 @@ export const DynamicAria: Story = {
 };
 
 export const NativeEvents: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { NativeEventsHarness },
     template: "<NativeEventsHarness />",

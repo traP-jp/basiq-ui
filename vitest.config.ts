@@ -17,6 +17,14 @@ export default mergeConfig(
         {
           extends: true,
           test: {
+            name: "unit",
+            environment: "node",
+            include: ["src/stories/**/*.test.ts"],
+          },
+        },
+        {
+          extends: true,
+          test: {
             name: "ssr",
             environment: "node",
             include: ["src/**/*.ssr.test.ts"],

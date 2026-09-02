@@ -1,15 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, within } from "storybook/test";
 
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  fillComponentSlot,
+} from "../../stories/storybook-parameters";
 import BasiqCard from "./BasiqCard.vue";
 
 const meta = {
   title: "Components/Card",
   component: BasiqCard,
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
     description: "補足説明を簡潔に表示します。",
     title: "Card title",
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: ["description", "title"],
+    },
   },
   render: (args) => ({
     components: { BasiqCard },
@@ -29,7 +40,25 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(
+    fillComponentSlot(
+      "BasiqCard",
+      `任意の内容をまとめるための本文です。
+<template #footer>Footer content</template>`,
+    ),
+  ),
+};
+
 export const HeaderBodyFooter: Story = {
+  parameters: createFixedVueSourceParameters(`
+<template>
+  <BasiqCard description="補足説明を簡潔に表示します。" title="Card title">
+    任意の内容をまとめるための本文です。
+    <template #footer>Footer content</template>
+  </BasiqCard>
+</template>
+`),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -41,9 +70,22 @@ export const HeaderBodyFooter: Story = {
 
 export const BodyOnly: Story = {
   args: { description: undefined, title: undefined },
+  parameters: createFixedVueSourceParameters(`
+<template>
+  <BasiqCard>任意の内容をまとめるための本文です。</BasiqCard>
+</template>
+`),
 };
 
 export const CustomHeader: Story = {
+  parameters: createFixedVueSourceParameters(`
+<template>
+  <BasiqCard>
+    <template #header><strong>Custom header</strong></template>
+    Body content
+  </BasiqCard>
+</template>
+`),
   render: () => ({
     components: { BasiqCard },
     template: `

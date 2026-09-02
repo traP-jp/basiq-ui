@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  controlsDisabledStoryParameters,
+  type PlaygroundSourceContext,
+} from "../../stories/storybook-parameters";
 import BasiqButton from "../button/BasiqButton.vue";
 import BasiqRadioGroup, { type BasiqRadioGroupItemDefinition } from "./BasiqRadioGroup.vue";
 
@@ -166,10 +172,61 @@ const ReactiveItemsHarness = defineComponent({
   `,
 });
 
+function createRadioGroupPlaygroundSource(_source: string, { args }: PlaygroundSourceContext) {
+  const attributes: string[] = [];
+
+  for (const name of ["description", "error", "label"] as const) {
+    const value = args[name];
+
+    if (typeof value === "string") {
+      attributes.push(`${name}="${escapeSourceAttribute(value)}"`);
+    }
+  }
+
+  if (args.disabled === true) {
+    attributes.push("disabled");
+  }
+
+  if (typeof args.invalid === "boolean") {
+    attributes.push(args.invalid ? "invalid" : ':invalid="false"');
+  }
+
+  if (typeof args.orientation === "string") {
+    attributes.push(`orientation="${escapeSourceAttribute(args.orientation)}"`);
+  }
+
+  if (args.required === true) {
+    attributes.push("required");
+  }
+
+  const initialValue = typeof args.defaultValue === "string" ? args.defaultValue : null;
+  const serializedItems = JSON.stringify(args.items ?? [], null, 2);
+
+  return `<script setup lang="ts">
+import { ref } from "vue";
+import { BasiqRadioGroup } from "basiq-ui";
+
+const value = ref<string | null>(${JSON.stringify(initialValue)});
+const items = ${serializedItems};
+</script>
+
+<template>
+  <BasiqRadioGroup
+    v-model="value"
+    :items="items"
+${attributes.map((attribute) => `    ${attribute}`).join("\n")}
+  />
+</template>`;
+}
+
+function escapeSourceAttribute(value: string) {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
+}
+
 const meta = {
   title: "Components/RadioGroup",
   component: BasiqRadioGroup,
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
     defaultValue: "email",
     description: "通知を受け取る方法を選択してください",
@@ -185,6 +242,21 @@ const meta = {
     orientation: {
       control: "select",
       options: ["horizontal", "vertical"],
+    },
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: [
+        "description",
+        "disabled",
+        "error",
+        "invalid",
+        "items",
+        "label",
+        "orientation",
+        "required",
+      ],
     },
   },
   render: (args) => ({
@@ -206,7 +278,39 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(createRadioGroupPlaygroundSource),
+};
+
 export const Default: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqRadioGroup } from "basiq-ui";
+
+    const value = ref("email");
+    const items = [
+      { description: "メールで更新を受け取ります", label: "メール", value: "email" },
+      { description: "ブラウザへ通知します", label: "プッシュ通知", value: "push" },
+      { disabled: true, label: "SMS（準備中）", value: "sms" },
+    ];
+    </script>
+
+    <template>
+      <BasiqRadioGroup
+        v-model="value"
+        description="通知を受け取る方法を選択してください"
+        :items="items"
+        label="通知方法"
+      />
+    </template>
+  `),
+};
+
+export const DefaultInteraction: Story = {
+  ...Default,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const group = canvas.getByRole("radiogroup", { name: "通知方法" });
@@ -224,6 +328,8 @@ export const Default: Story = {
 };
 
 export const KeyboardNavigation: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const email = canvas.getByRole("radio", { name: /メール/ });
@@ -243,9 +349,30 @@ export const KeyboardNavigation: Story = {
 
 export const Horizontal: Story = {
   args: { orientation: "horizontal" },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqRadioGroup } from "basiq-ui";
+
+    const items = [
+      { label: "メール", value: "email" },
+      { label: "プッシュ通知", value: "push" },
+    ];
+    </script>
+
+    <template>
+      <BasiqRadioGroup
+        default-value="email"
+        :items="items"
+        label="通知方法"
+        orientation="horizontal"
+      />
+    </template>
+  `),
 };
 
 export const HorizontalNarrow: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { BasiqRadioGroup },
     template: `
@@ -275,6 +402,29 @@ export const HorizontalNarrow: Story = {
 };
 
 export const CustomItemLabel: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqRadioGroup } from "basiq-ui";
+
+    const value = ref("email");
+    const items = [
+      { description: "メールで更新を受け取ります", label: "メール", value: "email" },
+      { description: "ブラウザへ通知します", label: "プッシュ通知", value: "push" },
+      { disabled: true, label: "SMS（準備中）", value: "sms" },
+    ];
+    </script>
+
+    <template>
+      <BasiqRadioGroup v-model="value" :items="items" label="通知方法">
+        <template #item-label="{ checked, index, item }">
+          <span :data-checked="checked">
+            {{ index + 1 }}. {{ item.label }}
+          </span>
+        </template>
+      </BasiqRadioGroup>
+    </template>
+  `),
   render: () => ({
     components: { BasiqRadioGroup },
     setup() {
@@ -297,6 +447,12 @@ export const CustomItemLabel: Story = {
       </div>
     `,
   }),
+};
+
+export const CustomItemLabelInteraction: Story = {
+  ...CustomItemLabel,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const email = canvas.getByRole("radio", { name: "1. メール" });
@@ -314,6 +470,31 @@ export const CustomItemLabel: Story = {
 
 export const Error: Story = {
   args: { defaultValue: null, error: "通知方法を選択してください", required: true },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqRadioGroup } from "basiq-ui";
+
+    const items = [
+      { label: "メール", value: "email" },
+      { label: "プッシュ通知", value: "push" },
+    ];
+    </script>
+
+    <template>
+      <BasiqRadioGroup
+        error="通知方法を選択してください"
+        :items="items"
+        label="通知方法"
+        required
+      />
+    </template>
+  `),
+};
+
+export const ErrorInteraction: Story = {
+  ...Error,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const group = canvas.getByRole("radiogroup", { name: "通知方法" });
@@ -332,6 +513,25 @@ export const Error: Story = {
 
 export const Disabled: Story = {
   args: { disabled: true },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqRadioGroup } from "basiq-ui";
+
+    const items = [
+      { label: "メール", value: "email" },
+      { label: "プッシュ通知", value: "push" },
+    ];
+    </script>
+
+    <template>
+      <BasiqRadioGroup
+        default-value="email"
+        disabled
+        :items="items"
+        label="通知方法"
+      />
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -340,6 +540,8 @@ export const Disabled: Story = {
 };
 
 export const ControlledRejection: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ControlledRejectionHarness },
     template: "<ControlledRejectionHarness />",
@@ -357,6 +559,8 @@ export const ControlledRejection: Story = {
 };
 
 export const UncontrolledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness />",
@@ -374,6 +578,8 @@ export const UncontrolledFormReset: Story = {
 };
 
 export const ControlledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness controlled />",
@@ -382,6 +588,8 @@ export const ControlledFormReset: Story = {
 };
 
 export const ControlledEmptyFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness controlled empty-default />",
@@ -399,6 +607,8 @@ export const ControlledEmptyFormReset: Story = {
 };
 
 export const CanceledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness canceled />",
@@ -414,6 +624,8 @@ export const CanceledFormReset: Story = {
 };
 
 export const NativeFormData: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { FormDataHarness },
     template: "<FormDataHarness named />",
@@ -431,6 +643,8 @@ export const NativeFormData: Story = {
 };
 
 export const ExternalForm: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { FormDataHarness },
     template: "<FormDataHarness external />",
@@ -450,6 +664,8 @@ export const ExternalForm: Story = {
 };
 
 export const GeneratedNameIsNotSubmitted: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { FormDataHarness },
     template: "<FormDataHarness />",
@@ -465,6 +681,8 @@ export const GeneratedNameIsNotSubmitted: Story = {
 };
 
 export const ReactiveItems: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ReactiveItemsHarness },
     template: "<ReactiveItemsHarness />",

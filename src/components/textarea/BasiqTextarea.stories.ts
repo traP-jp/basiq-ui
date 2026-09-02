@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  addComponentAttribute,
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  controlsDisabledStoryParameters,
+} from "../../stories/storybook-parameters";
 import BasiqFormField from "../form-field/BasiqFormField.vue";
 import BasiqTextarea from "./BasiqTextarea.vue";
 
@@ -122,7 +128,7 @@ const NativeEventsHarness = defineComponent({
 const meta = {
   title: "Components/Textarea",
   component: BasiqTextarea,
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
     defaultValue: "",
     disabled: false,
@@ -137,6 +143,12 @@ const meta = {
     resize: {
       control: "select",
       options: ["none", "vertical"],
+    },
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: ["disabled", "invalid", "placeholder", "readonly", "required", "resize", "rows"],
     },
   },
   render: (args) => ({
@@ -154,7 +166,24 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(
+    addComponentAttribute("BasiqTextarea", "aria-label", '"入力内容"'),
+  ),
+};
+
 export const Default: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqTextarea aria-label="入力内容" placeholder="入力してください" />
+    </template>
+  `),
+};
+
+export const DefaultInteraction: Story = {
+  ...Default,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const textarea = canvas.getByRole("textbox", { name: "入力内容" });
@@ -166,6 +195,24 @@ export const Default: Story = {
 };
 
 export const WithFormField: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqFormField, BasiqTextarea } from "basiq-ui";
+
+    const value = ref("");
+    </script>
+
+    <template>
+      <BasiqFormField
+        description="100文字以内で入力してください"
+        label="説明"
+        required
+      >
+        <BasiqTextarea v-model="value" maxlength="100" name="description" />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqFormField, BasiqTextarea },
     setup() {
@@ -185,6 +232,12 @@ export const WithFormField: Story = {
       </div>
     `,
   }),
+};
+
+export const WithFormFieldInteraction: Story = {
+  ...WithFormField,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const description = canvas.getByText("100文字以内で入力してください");
@@ -199,6 +252,11 @@ export const WithFormField: Story = {
 
 export const Invalid: Story = {
   args: { invalid: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqTextarea aria-label="入力内容" invalid />
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -211,6 +269,11 @@ export const Invalid: Story = {
 
 export const Disabled: Story = {
   args: { disabled: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqTextarea aria-label="入力内容" disabled />
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -220,6 +283,11 @@ export const Disabled: Story = {
 
 export const ResizeDisabled: Story = {
   args: { resize: "none" },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqTextarea aria-label="入力内容" resize="none" />
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const textarea = canvas.getByRole("textbox", { name: "入力内容" });
@@ -229,6 +297,8 @@ export const ResizeDisabled: Story = {
 };
 
 export const ControlledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ControlledResetHarness },
     template: "<ControlledResetHarness />",
@@ -245,6 +315,8 @@ export const ControlledFormReset: Story = {
 };
 
 export const UncontrolledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { UncontrolledResetHarness },
     template: "<UncontrolledResetHarness />",
@@ -261,6 +333,8 @@ export const UncontrolledFormReset: Story = {
 };
 
 export const FormSubmission: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { FormSubmissionHarness },
     template: "<FormSubmissionHarness />",
@@ -274,6 +348,8 @@ export const FormSubmission: Story = {
 };
 
 export const ExternalForm: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ExternalFormHarness },
     template: "<ExternalFormHarness />",
@@ -299,6 +375,8 @@ export const ExternalForm: Story = {
 };
 
 export const NativeEvents: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { NativeEventsHarness },
     template: "<NativeEventsHarness />",

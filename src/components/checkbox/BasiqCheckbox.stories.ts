@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  controlsDisabledStoryParameters,
+  fillComponentSlot,
+} from "../../stories/storybook-parameters";
 import BasiqButton from "../button/BasiqButton.vue";
 import BasiqFormField from "../form-field/BasiqFormField.vue";
 import BasiqCheckbox from "./BasiqCheckbox.vue";
@@ -110,7 +116,7 @@ const IndeterminateResetHarness = defineComponent({
 const meta = {
   title: "Components/Checkbox",
   component: BasiqCheckbox,
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
     defaultValue: false,
     disabled: false,
@@ -118,6 +124,12 @@ const meta = {
     invalid: false,
     required: false,
     value: "on",
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: ["disabled", "invalid", "required"],
+    },
   },
   render: (args) => ({
     components: { BasiqCheckbox },
@@ -140,7 +152,29 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(fillComponentSlot("BasiqCheckbox", "選択する")),
+};
+
 export const Default: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqCheckbox } from "basiq-ui";
+
+    const checked = ref(false);
+    </script>
+
+    <template>
+      <BasiqCheckbox v-model="checked">選択する</BasiqCheckbox>
+    </template>
+  `),
+};
+
+export const DefaultInteraction: Story = {
+  ...Default,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const checkbox = canvas.getByRole("checkbox", { name: "選択する" });
@@ -158,9 +192,32 @@ export const Default: Story = {
 
 export const Checked: Story = {
   args: { defaultValue: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqCheckbox default-value>選択する</BasiqCheckbox>
+    </template>
+  `),
 };
 
 export const Indeterminate: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqCheckbox } from "basiq-ui";
+
+    const checked = ref(false);
+    const indeterminate = ref(true);
+    </script>
+
+    <template>
+      <BasiqCheckbox
+        v-model="checked"
+        v-model:indeterminate="indeterminate"
+      >
+        一部を選択済み
+      </BasiqCheckbox>
+    </template>
+  `),
   render: () => ({
     components: { BasiqCheckbox },
     setup() {
@@ -181,6 +238,12 @@ export const Indeterminate: Story = {
       </div>
     `,
   }),
+};
+
+export const IndeterminateInteraction: Story = {
+  ...Indeterminate,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const checkbox = canvas.getByRole("checkbox", { name: "一部を選択済み" });
@@ -193,6 +256,8 @@ export const Indeterminate: Story = {
 };
 
 export const CheckedAndIndeterminate: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   args: { defaultValue: true, indeterminate: true },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -213,14 +278,29 @@ export const CheckedAndIndeterminate: Story = {
 
 export const DisabledChecked: Story = {
   args: { defaultValue: true, disabled: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqCheckbox default-value disabled>選択する</BasiqCheckbox>
+    </template>
+  `),
 };
 
 export const DisabledIndeterminate: Story = {
   args: { disabled: true, indeterminate: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqCheckbox disabled indeterminate>一部を選択済み</BasiqCheckbox>
+    </template>
+  `),
 };
 
 export const Disabled: Story = {
   args: { disabled: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqCheckbox disabled>選択する</BasiqCheckbox>
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("checkbox", { name: "選択する" })).toBeDisabled();
@@ -228,6 +308,18 @@ export const Disabled: Story = {
 };
 
 export const FormField: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField
+        description="送信前に内容を確認してください"
+        error="同意が必要です"
+        label="利用規約への同意"
+        required
+      >
+        <BasiqCheckbox name="agreement" />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqCheckbox, BasiqFormField },
     template: `
@@ -243,6 +335,12 @@ export const FormField: Story = {
       </div>
     `,
   }),
+};
+
+export const FormFieldInteraction: Story = {
+  ...FormField,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const checkbox = canvas.getByRole<HTMLInputElement>("checkbox", {
@@ -262,6 +360,8 @@ export const FormField: Story = {
 };
 
 export const ControlledRejection: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ControlledRejectionHarness },
     template: "<ControlledRejectionHarness />",
@@ -277,6 +377,8 @@ export const ControlledRejection: Story = {
 };
 
 export const UncontrolledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness />",
@@ -294,6 +396,8 @@ export const UncontrolledFormReset: Story = {
 };
 
 export const ControlledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness controlled />",
@@ -302,6 +406,8 @@ export const ControlledFormReset: Story = {
 };
 
 export const CanceledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness canceled />",
@@ -317,6 +423,8 @@ export const CanceledFormReset: Story = {
 };
 
 export const IndeterminateIsNotReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { IndeterminateResetHarness },
     template: "<IndeterminateResetHarness />",
@@ -335,6 +443,8 @@ export const IndeterminateIsNotReset: Story = {
 };
 
 export const ExternalForm: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ExternalFormHarness },
     template: "<ExternalFormHarness />",
@@ -355,6 +465,8 @@ export const ExternalForm: Story = {
 };
 
 export const NativeEvents: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   args: {
     onBlur: fn(),
     onChange: fn(),
