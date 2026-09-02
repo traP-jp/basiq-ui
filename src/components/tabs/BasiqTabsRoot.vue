@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { TabsRoot } from "reka-ui";
-import { computed, watchEffect } from "vue";
+import { watchEffect } from "vue";
 
 export type BasiqTabsActivationMode = "automatic" | "manual";
+export type BasiqTabsDirection = "ltr" | "rtl";
 export type BasiqTabsOrientation = "horizontal" | "vertical";
 
 export interface BasiqTabsRootProps {
   activationMode?: BasiqTabsActivationMode;
   defaultValue?: string;
-  modelValue?: string | null;
+  dir?: BasiqTabsDirection;
+  modelValue?: string;
   orientation?: BasiqTabsOrientation;
   unmountOnHide?: boolean;
 }
@@ -18,11 +20,12 @@ export interface BasiqTabsRootEmits {
 }
 
 export interface BasiqTabsRootSlotProps {
-  modelValue: string | null | undefined;
+  modelValue: string | undefined;
 }
 
 const props = withDefaults(defineProps<BasiqTabsRootProps>(), {
   activationMode: "automatic",
+  dir: undefined,
   modelValue: undefined,
   orientation: "horizontal",
   unmountOnHide: true,
@@ -33,16 +36,6 @@ defineSlots<{
 }>();
 
 const isInitiallyControlled = props.modelValue !== undefined;
-// Reka UI treats only undefined as uncontrolled. null keeps an intentionally empty model controlled.
-const rekaModelValue = computed(
-  () => props.modelValue as Exclude<BasiqTabsRootProps["modelValue"], null>,
-);
-
-if (import.meta.env.DEV && !isInitiallyControlled && props.defaultValue === undefined) {
-  console.warn(
-    "[BasiQ UI] BasiqTabsRoot requires modelValue or defaultValue so that one tab is selected.",
-  );
-}
 
 watchEffect(() => {
   if (!import.meta.env.DEV) return;
@@ -51,7 +44,7 @@ watchEffect(() => {
 
   if (isControlled !== isInitiallyControlled) {
     console.warn(
-      "[BasiQ UI] BasiqTabsRoot must not switch between controlled and uncontrolled state. Use null for a controlled empty value.",
+      "[BasiQ UI] BasiqTabsRoot must not switch between controlled and uncontrolled state.",
     );
   }
 });
@@ -62,7 +55,8 @@ watchEffect(() => {
     :activation-mode="activationMode"
     :class="$style.root"
     :default-value="defaultValue"
-    :model-value="rekaModelValue"
+    :dir="dir"
+    :model-value="modelValue"
     :orientation="orientation"
     :unmount-on-hide="unmountOnHide"
     @update:model-value="$emit('update:modelValue', $event)"

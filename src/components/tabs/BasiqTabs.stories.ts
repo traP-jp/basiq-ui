@@ -231,6 +231,68 @@ export const ManualActivation: Story = {
   },
 };
 
+export const RightToLeft: Story = {
+  args: {
+    ariaLabel: "設定",
+    defaultValue: "account",
+    dir: "rtl",
+    items: settingsItems,
+    loop: false,
+  },
+  render: (args) => ({
+    components: { BasiqTabs },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story" style="max-width: 32rem">
+        <BasiqTabs v-bind="args" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const tabList = canvas.getByRole("tablist", { name: "設定" });
+    const profile = canvas.getByRole("tab", { name: "プロフィール" });
+    const account = canvas.getByRole("tab", { name: "アカウント" });
+
+    await expect(tabList.parentElement).toHaveAttribute("dir", "rtl");
+    account.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    await expect(profile).toHaveFocus();
+    await expect(profile).toHaveAttribute("aria-selected", "true");
+    profile.blur();
+  },
+};
+
+export const CustomTrigger: Story = {
+  args: {
+    ariaLabel: "設定",
+    items: settingsItems,
+  },
+  render: (args) => ({
+    components: { BasiqTabs },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story" style="max-width: 32rem">
+        <BasiqTabs v-bind="args">
+          <template #trigger="{ item, selected }">
+            <span style="display: inline-flex; gap: 6px; align-items: center">
+              <span aria-hidden="true">{{ selected ? "●" : "○" }}</span>
+              <span>{{ item.label }}</span>
+            </span>
+          </template>
+        </BasiqTabs>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getByRole("tab", { name: "プロフィール" })).toBeVisible();
+    await expect(canvas.getByRole("tab", { name: "アカウント" })).toBeVisible();
+    await expect(canvas.getByRole("tab", { name: "通知" })).toBeVisible();
+  },
+};
+
 const ControlledTabsHarness = defineComponent({
   name: "ControlledTabsHarness",
   components: { BasiqTabs },
@@ -242,10 +304,9 @@ const ControlledTabsHarness = defineComponent({
   template: `
     <div class="basiq-story" style="max-width: 32rem">
       <BasiqTabs
+        v-model="selected"
         :items="items"
-        :model-value="selected"
         aria-label="設定"
-        @update:model-value="selected = $event"
       />
     </div>
   `,
@@ -291,22 +352,18 @@ export const ControlledUpdateRejected: Story = {
   },
 };
 
-export const ControlledEmptyUpdateRejected: Story = {
-  args: {
-    ariaLabel: "設定",
-    items: settingsItems,
-    modelValue: null,
-  },
+export const ControlledUndefinedUpdateRejected: Story = {
   render: (args) => ({
     components: { BasiqTabs },
-    setup: () => ({ args }),
+    setup: () => ({ args, settingsItems }),
     template: `
       <div class="basiq-story" style="max-width: 32rem">
-        <BasiqTabs v-bind="args">
-          <template #trigger="{ item, selected }">
-            <span :data-selected="String(selected)">{{ item.label }}</span>
-          </template>
-        </BasiqTabs>
+        <BasiqTabs
+          :items="settingsItems"
+          :model-value="undefined"
+          aria-label="設定"
+          @update:model-value="args['onUpdate:modelValue']"
+        />
       </div>
     `,
   }),
@@ -315,16 +372,13 @@ export const ControlledEmptyUpdateRejected: Story = {
     const profile = canvas.getByRole("tab", { name: "プロフィール" });
     const account = canvas.getByRole("tab", { name: "アカウント" });
 
-    await expect(profile).toHaveAttribute("aria-selected", "false");
+    await expect(profile).toHaveAttribute("aria-selected", "true");
     await expect(account).toHaveAttribute("aria-selected", "false");
-    await expect(canvas.queryByRole("tabpanel")).not.toBeInTheDocument();
 
     await userEvent.click(account);
     await expect(args["onUpdate:modelValue"]).toHaveBeenCalledWith("account");
-    await expect(profile).toHaveAttribute("aria-selected", "false");
+    await expect(profile).toHaveAttribute("aria-selected", "true");
     await expect(account).toHaveAttribute("aria-selected", "false");
-    await expect(account.firstElementChild).toHaveAttribute("data-selected", "false");
-    await expect(canvas.queryByRole("tabpanel")).not.toBeInTheDocument();
   },
 };
 
@@ -387,6 +441,46 @@ export const ReactiveItems: Story = {
     await expect(canvas.getByRole("tabpanel")).toHaveTextContent(
       "通知の受け取り方を変更できます。",
     );
+  },
+};
+
+const InitiallyEmptyTabsHarness = defineComponent({
+  name: "InitiallyEmptyTabsHarness",
+  components: { BasiqTabs },
+  setup() {
+    const items = ref<BasiqTabsItem[]>([]);
+
+    function loadItems() {
+      items.value = settingsItems.map((item) => ({ ...item }));
+    }
+
+    return { items, loadItems };
+  },
+  template: `
+    <div class="basiq-story" style="max-width: 32rem">
+      <button type="button" style="margin-bottom: 16px" @click="loadItems">項目を読み込む</button>
+      <BasiqTabs :items="items" aria-label="非同期の設定" />
+    </div>
+  `,
+});
+
+export const InitiallyEmptyItems: Story = {
+  render: () => ({
+    components: { InitiallyEmptyTabsHarness },
+    template: "<InitiallyEmptyTabsHarness />",
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.queryByRole("tab")).not.toBeInTheDocument();
+    await userEvent.click(canvas.getByRole("button", { name: "項目を読み込む" }));
+
+    const profile = canvas.getByRole("tab", { name: "プロフィール" });
+    const account = canvas.getByRole("tab", { name: "アカウント" });
+
+    await expect(profile).toHaveAttribute("aria-selected", "true");
+    await userEvent.click(account);
+    await expect(account).toHaveAttribute("aria-selected", "true");
   },
 };
 

@@ -55,6 +55,7 @@ export type { BasiqTabsListProps } from "./components/tabs/BasiqTabsList.vue";
 export { default as BasiqTabsRoot } from "./components/tabs/BasiqTabsRoot.vue";
 export type {
   BasiqTabsActivationMode,
+  BasiqTabsDirection,
   BasiqTabsOrientation,
   BasiqTabsRootEmits,
   BasiqTabsRootProps,

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from "vue";
 
+import { hasInitialProp } from "../controllable-state/hasInitialProp";
 import BasiqTabsContent from "./BasiqTabsContent.vue";
 import BasiqTabsList from "./BasiqTabsList.vue";
 import BasiqTabsRoot, {
   type BasiqTabsActivationMode,
+  type BasiqTabsDirection,
   type BasiqTabsOrientation,
 } from "./BasiqTabsRoot.vue";
 import BasiqTabsTrigger from "./BasiqTabsTrigger.vue";
@@ -21,9 +23,10 @@ export interface BasiqTabsProps {
   ariaLabel?: string;
   ariaLabelledby?: string;
   defaultValue?: string;
+  dir?: BasiqTabsDirection;
   items: readonly BasiqTabsItem[];
   loop?: boolean;
-  modelValue?: string | null;
+  modelValue?: string;
   orientation?: BasiqTabsOrientation;
   unmountOnHide?: boolean;
 }
@@ -43,6 +46,7 @@ const props = withDefaults(defineProps<BasiqTabsProps>(), {
   ariaLabel: undefined,
   ariaLabelledby: undefined,
   defaultValue: undefined,
+  dir: undefined,
   loop: true,
   modelValue: undefined,
   orientation: "horizontal",
@@ -54,14 +58,18 @@ defineSlots<{
   trigger?: (props: BasiqTabsItemSlotProps) => unknown;
 }>();
 
-const isControlled = computed(() => props.modelValue !== undefined);
+const isControlled = hasInitialProp("modelValue");
 const firstEnabledValue = computed(() => props.items.find((item) => item.disabled !== true)?.value);
 const internalValue = ref<string | undefined>(props.defaultValue ?? firstEnabledValue.value);
-const ownedValue = computed(() => (isControlled.value ? props.modelValue : internalValue.value));
-const resolvedValue = computed(() => (isEnabledValue(ownedValue.value) ? ownedValue.value : null));
+const ownedValue = computed(() => (isControlled ? props.modelValue : internalValue.value));
+const selectedValue = computed(() =>
+  isEnabledValue(ownedValue.value) ? ownedValue.value : firstEnabledValue.value,
+);
+let hasValidatedDefaultValue = false;
+let hasWarnedModeSwitch = false;
 
 watchEffect(() => {
-  if (isControlled.value || isEnabledValue(internalValue.value)) return;
+  if (isControlled || isEnabledValue(internalValue.value)) return;
   if (firstEnabledValue.value !== undefined) internalValue.value = firstEnabledValue.value;
 });
 
@@ -70,40 +78,65 @@ watchEffect(() => {
 
   const values = props.items.map((item) => item.value);
   const duplicate = values.find((value, index) => values.indexOf(value) !== index);
+  const unnamedItem = props.items.find((item) => item.label.trim().length === 0);
 
   if (duplicate !== undefined) {
     console.warn(`[BasiQ UI] BasiqTabs item values must be unique: "${duplicate}".`);
+  }
+
+  if (unnamedItem !== undefined) {
+    console.warn(
+      `[BasiQ UI] BasiqTabs item labels must not be empty: "${unnamedItem.value}". The label is used as the tab's accessible name.`,
+    );
   }
 
   if (props.items.length > 0 && firstEnabledValue.value === undefined) {
     console.warn("[BasiQ UI] BasiqTabs requires at least one enabled item.");
   }
 
-  if (isControlled.value && props.modelValue === null && firstEnabledValue.value !== undefined) {
-    console.warn("[BasiQ UI] BasiqTabs has enabled items but modelValue is null.");
+  if (isControlled && firstEnabledValue.value !== undefined && !isEnabledValue(props.modelValue)) {
+    console.warn(
+      `[BasiQ UI] BasiqTabs modelValue must match an enabled item: "${String(props.modelValue)}". The first enabled item is displayed instead.`,
+    );
   }
 
-  if (isControlled.value && props.modelValue !== null && !isEnabledValue(props.modelValue)) {
-    console.warn(
-      `[BasiQ UI] BasiqTabs modelValue must match an enabled item: "${props.modelValue}".`,
-    );
+  if (!isControlled && !hasWarnedModeSwitch && props.modelValue !== undefined) {
+    hasWarnedModeSwitch = true;
+    console.warn("[BasiQ UI] BasiqTabs must not switch between controlled and uncontrolled state.");
+  }
+
+  if (
+    !isControlled &&
+    !hasValidatedDefaultValue &&
+    props.defaultValue !== undefined &&
+    firstEnabledValue.value !== undefined
+  ) {
+    hasValidatedDefaultValue = true;
+
+    if (!isEnabledValue(props.defaultValue)) {
+      console.warn(
+        `[BasiQ UI] BasiqTabs defaultValue must match an enabled item: "${props.defaultValue}". The first enabled item is displayed instead.`,
+      );
+    }
   }
 });
 
-function isEnabledValue(value: string | null | undefined): value is string {
+function isEnabledValue(value: string | undefined): value is string {
   return props.items.some((item) => item.value === value && item.disabled !== true);
 }
 
 function handleValueChange(value: string) {
-  if (!isControlled.value) internalValue.value = value;
+  if (!isControlled) internalValue.value = value;
   emit("update:modelValue", value);
 }
 </script>
 
 <template>
   <BasiqTabsRoot
+    :key="selectedValue === undefined ? 'empty' : 'selected'"
     :activation-mode="activationMode"
-    :model-value="resolvedValue"
+    :dir="dir"
+    :model-value="selectedValue"
     :orientation="orientation"
     :unmount-on-hide="unmountOnHide"
     @update:model-value="handleValueChange"
@@ -112,6 +145,7 @@ function handleValueChange(value: string) {
       <BasiqTabsTrigger
         v-for="(item, index) in items"
         :key="item.value"
+        :aria-label="$slots.trigger ? item.label : undefined"
         :disabled="item.disabled"
         :value="item.value"
       >
@@ -120,7 +154,7 @@ function handleValueChange(value: string) {
           name="trigger"
           :index="index"
           :item="item"
-          :selected="item.value === resolvedValue"
+          :selected="item.value === selectedValue"
         />
         <template v-else>{{ item.label }}</template>
       </BasiqTabsTrigger>
@@ -132,7 +166,7 @@ function handleValueChange(value: string) {
         name="content"
         :index="index"
         :item="item"
-        :selected="item.value === resolvedValue"
+        :selected="item.value === selectedValue"
       />
       <template v-else>{{ item.content }}</template>
     </BasiqTabsContent>

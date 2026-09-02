@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, defineComponent, h } from "vue";
 import { renderToString } from "vue/server-renderer";
 
-import BasiqTabs, { type BasiqTabsItem } from "./BasiqTabs.vue";
+import BasiqTabs, { type BasiqTabsItem, type BasiqTabsItemSlotProps } from "./BasiqTabs.vue";
 import BasiqTabsContent from "./BasiqTabsContent.vue";
 import BasiqTabsList from "./BasiqTabsList.vue";
 import BasiqTabsRoot from "./BasiqTabsRoot.vue";
@@ -58,20 +58,39 @@ describe("BasiqTabs SSR", () => {
     expect(emit).not.toHaveBeenCalled();
   });
 
-  it("keeps a controlled null value unselected", async () => {
+  it("falls back to the first enabled item for an invalid controlled value", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     try {
       const Root = defineComponent({
-        setup: () => () => h(BasiqTabs, { ariaLabel: "設定", items, modelValue: null }),
+        setup: () => () => h(BasiqTabs, { ariaLabel: "設定", items, modelValue: "missing" }),
       });
       const html = await renderToString(createSSRApp(Root));
 
-      expect(html).not.toContain('aria-selected="true"');
-      expect(html).not.toContain("プロフィール本文");
+      expect(html).toContain('aria-selected="true"');
+      expect(html).toContain("プロフィール本文");
       expect(html).not.toContain("アカウント本文");
       expect(warn).toHaveBeenCalledWith(
-        "[BasiQ UI] BasiqTabs has enabled items but modelValue is null.",
+        '[BasiQ UI] BasiqTabs modelValue must match an enabled item: "missing". The first enabled item is displayed instead.',
+      );
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("falls back to the first enabled item for an invalid default value", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    try {
+      const Root = defineComponent({
+        setup: () => () => h(BasiqTabs, { ariaLabel: "設定", defaultValue: "missing", items }),
+      });
+      const html = await renderToString(createSSRApp(Root));
+
+      expect(html).toContain("プロフィール本文");
+      expect(html).not.toContain("アカウント本文");
+      expect(warn).toHaveBeenCalledWith(
+        '[BasiQ UI] BasiqTabs defaultValue must match an enabled item: "missing". The first enabled item is displayed instead.',
       );
     } finally {
       warn.mockRestore();
@@ -92,6 +111,33 @@ describe("BasiqTabs SSR", () => {
 
     expect(html).toContain('role="tablist"');
     expect(html).toContain('aria-labelledby="settings-heading"');
+  });
+
+  it("uses each item label as the accessible name of a custom trigger", async () => {
+    const Root = defineComponent({
+      setup: () => () =>
+        h(
+          BasiqTabs,
+          { ariaLabel: "設定", items },
+          {
+            trigger: ({ item }: BasiqTabsItemSlotProps) =>
+              h("span", { "aria-hidden": "true" }, item.value.slice(0, 1)),
+          },
+        ),
+    });
+    const html = await renderToString(createSSRApp(Root));
+
+    expect(html).toContain('aria-label="プロフィール"');
+    expect(html).toContain('aria-label="アカウント"');
+  });
+
+  it("forwards the text direction to Reka UI", async () => {
+    const Root = defineComponent({
+      setup: () => () => h(BasiqTabs, { ariaLabel: "設定", dir: "rtl", items }),
+    });
+    const html = await renderToString(createSSRApp(Root));
+
+    expect(html).toContain('dir="rtl"');
   });
 
   it("keeps inactive content in the HTML when unmountOnHide is false", async () => {
@@ -147,7 +193,7 @@ describe("BasiqTabs SSR", () => {
 
       await renderToString(createSSRApp(Root));
       expect(warn).toHaveBeenCalledWith(
-        "[BasiQ UI] BasiqTabsList requires an accessible name. Pass ariaLabel/ariaLabelledby to BasiqTabs, or aria-label/aria-labelledby to BasiqTabsList.",
+        "[BasiQ UI] BasiqTabsList requires an accessible name. Pass ariaLabel or ariaLabelledby.",
       );
     } finally {
       warn.mockRestore();

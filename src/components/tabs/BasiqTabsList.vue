@@ -1,31 +1,41 @@
 <script setup lang="ts">
 import { TabsList } from "reka-ui";
-import { useAttrs } from "vue";
+import { watchEffect } from "vue";
 
 export interface BasiqTabsListProps {
+  ariaLabel?: string;
+  ariaLabelledby?: string;
   loop?: boolean;
 }
 
-withDefaults(defineProps<BasiqTabsListProps>(), {
+const props = withDefaults(defineProps<BasiqTabsListProps>(), {
+  ariaLabel: undefined,
+  ariaLabelledby: undefined,
   loop: true,
 });
 
-const attrs = useAttrs();
-const ariaLabel = attrs["aria-label"];
-const ariaLabelledby = attrs["aria-labelledby"];
-const hasAccessibleName = [ariaLabel, ariaLabelledby].some(
-  (value) => typeof value === "string" && value.trim().length > 0,
-);
+watchEffect(() => {
+  if (!import.meta.env.DEV) return;
 
-if (import.meta.env.DEV && !hasAccessibleName) {
-  console.warn(
-    "[BasiQ UI] BasiqTabsList requires an accessible name. Pass ariaLabel/ariaLabelledby to BasiqTabs, or aria-label/aria-labelledby to BasiqTabsList.",
+  const hasAccessibleName = [props.ariaLabel, props.ariaLabelledby].some(
+    (value) => typeof value === "string" && value.trim().length > 0,
   );
-}
+
+  if (!hasAccessibleName) {
+    console.warn(
+      "[BasiQ UI] BasiqTabsList requires an accessible name. Pass ariaLabel or ariaLabelledby.",
+    );
+  }
+});
 </script>
 
 <template>
-  <TabsList :class="$style.root" :loop="loop">
+  <TabsList
+    :aria-label="ariaLabel"
+    :aria-labelledby="ariaLabelledby"
+    :class="$style.root"
+    :loop="loop"
+  >
     <slot />
   </TabsList>
 </template>
