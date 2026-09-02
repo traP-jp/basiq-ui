@@ -43,8 +43,9 @@ const StorybookScaffold = defineComponent({
 const meta = {
   title: "Development/Storybook scaffold",
   component: StorybookScaffold,
-  tags: ["test"],
+  tags: ["regression", "!autodocs"],
   parameters: {
+    controls: { disable: true },
     layout: "fullscreen",
   },
 } satisfies Meta;
