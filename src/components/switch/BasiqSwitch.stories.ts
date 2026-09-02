@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  controlsDisabledStoryParameters,
+  fillComponentSlot,
+} from "../../stories/storybook-parameters";
 import BasiqButton from "../button/BasiqButton.vue";
 import BasiqFormField from "../form-field/BasiqFormField.vue";
 import BasiqSwitch from "./BasiqSwitch.vue";
@@ -87,13 +93,19 @@ const ExternalFormHarness = defineComponent({
 const meta = {
   title: "Components/Switch",
   component: BasiqSwitch,
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
     defaultValue: false,
     disabled: false,
     invalid: false,
     required: false,
     value: "on",
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: ["disabled", "invalid", "required"],
+    },
   },
   render: (args) => ({
     components: { BasiqSwitch },
@@ -116,7 +128,29 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(fillComponentSlot("BasiqSwitch", "通知を有効にする")),
+};
+
 export const Default: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { ref } from "vue";
+    import { BasiqSwitch } from "basiq-ui";
+
+    const enabled = ref(false);
+    </script>
+
+    <template>
+      <BasiqSwitch v-model="enabled">通知を有効にする</BasiqSwitch>
+    </template>
+  `),
+};
+
+export const DefaultInteraction: Story = {
+  ...Default,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const control = canvas.getByRole("switch", { name: "通知を有効にする" });
@@ -132,10 +166,20 @@ export const Default: Story = {
 
 export const On: Story = {
   args: { defaultValue: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqSwitch default-value>通知を有効にする</BasiqSwitch>
+    </template>
+  `),
 };
 
 export const Disabled: Story = {
   args: { disabled: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqSwitch disabled>通知を有効にする</BasiqSwitch>
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("switch", { name: "通知を有効にする" })).toBeDisabled();
@@ -144,6 +188,11 @@ export const Disabled: Story = {
 
 export const DisabledOn: Story = {
   args: { defaultValue: true, disabled: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqSwitch default-value disabled>通知を有効にする</BasiqSwitch>
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const control = canvas.getByRole("switch", { name: "通知を有効にする" });
@@ -155,6 +204,19 @@ export const DisabledOn: Story = {
 
 export const Required: Story = {
   args: { required: true },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqSwitch name="notifications" required>
+        通知を有効にする
+      </BasiqSwitch>
+    </template>
+  `),
+};
+
+export const RequiredInteraction: Story = {
+  ...Required,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const control = canvas.getByRole<HTMLInputElement>("switch", {
@@ -169,6 +231,16 @@ export const Required: Story = {
 };
 
 export const FormField: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField
+        description="変更は即時に反映されます"
+        label="通知"
+      >
+        <BasiqSwitch name="notifications" />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqFormField, BasiqSwitch },
     template: `
@@ -182,6 +254,12 @@ export const FormField: Story = {
       </div>
     `,
   }),
+};
+
+export const FormFieldInteraction: Story = {
+  ...FormField,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const control = canvas.getByRole("switch", { name: "通知" });
@@ -194,6 +272,16 @@ export const FormField: Story = {
 };
 
 export const Invalid: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField
+        error="通知設定を確認してください"
+        label="通知"
+      >
+        <BasiqSwitch name="notifications" />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqFormField, BasiqSwitch },
     template: `
@@ -218,6 +306,8 @@ export const Invalid: Story = {
 };
 
 export const ControlledRejection: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ControlledRejectionHarness },
     template: "<ControlledRejectionHarness />",
@@ -233,6 +323,8 @@ export const ControlledRejection: Story = {
 };
 
 export const UncontrolledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness />",
@@ -249,6 +341,8 @@ export const UncontrolledFormReset: Story = {
 };
 
 export const ControlledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness controlled />",
@@ -257,6 +351,8 @@ export const ControlledFormReset: Story = {
 };
 
 export const CanceledFormReset: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ResetHarness },
     template: "<ResetHarness canceled />",
@@ -272,6 +368,8 @@ export const CanceledFormReset: Story = {
 };
 
 export const ExternalForm: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { ExternalFormHarness },
     template: "<ExternalFormHarness />",
@@ -292,6 +390,8 @@ export const ExternalForm: Story = {
 };
 
 export const NativeEvents: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   args: {
     onBlur: fn(),
     onChange: fn(),

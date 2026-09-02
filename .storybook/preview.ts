@@ -6,6 +6,7 @@ import type { Preview } from "@storybook/vue3-vite";
 import { defineComponent, h } from "vue";
 
 import BasiqThemeProvider, { type BasiqThemeMode } from "../src/theme/BasiqThemeProvider.vue";
+import storybookTheme from "./storybook-theme";
 
 import "../src/styles/index.css";
 import "./preview.css";
@@ -16,11 +17,16 @@ const preview: Preview = {
       defineComponent({
         name: "StorybookThemeDecorator",
         setup() {
+          const rootClass = [
+            "basiq-storybook-root",
+            context.viewMode === "docs" ? "basiq-storybook-docs-root" : undefined,
+          ];
+
           return () =>
             h(
               BasiqThemeProvider,
               {
-                class: "basiq-storybook-root",
+                class: rootClass,
                 mode: context.globals.themeMode as BasiqThemeMode,
                 "data-storybook-mode": context.globals.themeMode,
               },
@@ -48,8 +54,23 @@ const preview: Preview = {
     themeMode: "system",
   },
   parameters: {
+    layout: "fullscreen",
+    htmlLang: "ja",
     a11y: {
       test: "error",
+    },
+    docs: {
+      codePanel: true,
+      lang: "ja",
+      story: {
+        autoplay: false,
+      },
+      theme: storybookTheme,
+    },
+    options: {
+      storySort: {
+        order: ["Documents", "Foundation", "Components", "Examples", "Development"],
+      },
     },
   },
 };

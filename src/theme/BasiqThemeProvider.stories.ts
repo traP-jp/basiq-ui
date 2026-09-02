@@ -3,6 +3,11 @@ import { expect, within } from "storybook/test";
 import { defineComponent, h } from "vue";
 
 import BasiqCard from "../components/card/BasiqCard.vue";
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  fillComponentSlot,
+} from "../stories/storybook-parameters";
 import BasiqThemeProvider from "./BasiqThemeProvider.vue";
 
 const ThemeComparison = defineComponent({
@@ -31,14 +36,76 @@ const ThemeComparison = defineComponent({
 const meta = {
   title: "Foundation/ThemeProvider",
   component: BasiqThemeProvider,
-  tags: ["test"],
+  tags: ["autodocs"],
+  args: {
+    mode: "system",
+  },
+  argTypes: {
+    mode: {
+      control: "inline-radio",
+      options: ["system", "light", "dark"],
+    },
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: ["mode"],
+    },
+  },
+  render: (args) => ({
+    components: { BasiqCard, BasiqThemeProvider },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story">
+        <BasiqThemeProvider v-bind="args">
+          <BasiqCard class="basiq-story-card" title="Theme scope">
+            選択したテーマがこの領域に適用されます。
+          </BasiqCard>
+        </BasiqThemeProvider>
+      </div>
+    `,
+  }),
 } satisfies Meta<typeof BasiqThemeProvider>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(
+    fillComponentSlot(
+      "BasiqThemeProvider",
+      `<BasiqCard title="Theme scope">
+  選択したテーマがこの領域に適用されます。
+</BasiqCard>`,
+    ),
+  ),
+};
+
+export const Default: Story = {
+  parameters: createFixedVueSourceParameters(`
+      <template>
+        <BasiqThemeProvider mode="system">
+          <BasiqCard title="Theme scope">
+            選択したテーマがこの領域に適用されます。
+          </BasiqCard>
+        </BasiqThemeProvider>
+      </template>
+    `),
+};
+
 export const Comparison: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqThemeProvider mode="light">
+        <BasiqCard title="Light">Light theme scope</BasiqCard>
+      </BasiqThemeProvider>
+
+      <BasiqThemeProvider mode="dark">
+        <BasiqCard title="Dark">Dark theme scope</BasiqCard>
+      </BasiqThemeProvider>
+    </template>
+  `),
   render: () => ({
     components: { ThemeComparison },
     template: "<ThemeComparison />",

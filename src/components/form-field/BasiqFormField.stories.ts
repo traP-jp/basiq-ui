@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { defineComponent, ref } from "vue";
 
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  controlsDisabledStoryParameters,
+  type PlaygroundSourceContext,
+} from "../../stories/storybook-parameters";
 import BasiqButton from "../button/BasiqButton.vue";
 import BasiqInput from "../input/BasiqInput.vue";
 import BasiqFormField from "./BasiqFormField.vue";
@@ -31,17 +37,55 @@ const FormSubmissionHarness = defineComponent({
   `,
 });
 
+function createFormFieldPlaygroundSource(_source: string, { args }: PlaygroundSourceContext) {
+  const attributes: string[] = [];
+
+  for (const name of ["description", "error", "label"] as const) {
+    const value = args[name];
+
+    if (typeof value === "string") {
+      attributes.push(`${name}="${escapeHtmlAttribute(value)}"`);
+    }
+  }
+
+  if (typeof args.invalid === "boolean") {
+    attributes.push(args.invalid ? "invalid" : ':invalid="false"');
+  }
+
+  if (args.required === true) {
+    attributes.push("required");
+  }
+
+  return `<template>
+  <BasiqFormField
+${attributes.map((attribute) => `    ${attribute}`).join("\n")}
+  >
+    <BasiqInput autocomplete="username" name="username" />
+  </BasiqFormField>
+</template>`;
+}
+
+function escapeHtmlAttribute(value: string) {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
+}
+
 const meta = {
   title: "Components/FormField",
   component: BasiqFormField,
   subcomponents: { BasiqInput },
-  tags: ["test"],
+  tags: ["autodocs"],
   args: {
     description: "公開プロフィールに表示されます",
     error: undefined,
     invalid: undefined,
     label: "ユーザー名",
     required: true,
+  },
+  parameters: {
+    controls: {
+      disable: true,
+      include: ["description", "error", "invalid", "label", "required"],
+    },
   },
   render: (args) => ({
     components: { BasiqFormField, BasiqInput },
@@ -64,7 +108,28 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Playground: Story = {
+  parameters: createPlaygroundStoryParameters(createFormFieldPlaygroundSource),
+};
+
 export const Default: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField
+        description="公開プロフィールに表示されます"
+        label="ユーザー名"
+        required
+      >
+        <BasiqInput autocomplete="username" name="username" />
+      </BasiqFormField>
+    </template>
+  `),
+};
+
+export const DefaultInteraction: Story = {
+  ...Default,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const description = canvas.getByText("公開プロフィールに表示されます");
@@ -80,6 +145,18 @@ export const Default: Story = {
 
 export const Error: Story = {
   args: { error: "ユーザー名を入力してください", invalid: false },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField
+        description="公開プロフィールに表示されます"
+        error="ユーザー名を入力してください"
+        label="ユーザー名"
+        required
+      >
+        <BasiqInput autocomplete="username" name="username" />
+      </BasiqFormField>
+    </template>
+  `),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const description = canvas.getByText("公開プロフィールに表示されます");
@@ -94,6 +171,39 @@ export const Error: Story = {
 };
 
 export const Configurations: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField label="Default"><BasiqInput /></BasiqFormField>
+      <BasiqFormField label="Required" required><BasiqInput /></BasiqFormField>
+      <BasiqFormField description="補足説明" label="Description">
+        <BasiqInput />
+      </BasiqFormField>
+      <BasiqFormField description="補足説明" label="Required + Description" required>
+        <BasiqInput />
+      </BasiqFormField>
+      <BasiqFormField error="入力内容を確認してください" label="Error">
+        <BasiqInput />
+      </BasiqFormField>
+      <BasiqFormField error="入力内容を確認してください" label="Required + Error" required>
+        <BasiqInput />
+      </BasiqFormField>
+      <BasiqFormField
+        description="補足説明"
+        error="入力内容を確認してください"
+        label="Description + Error"
+      >
+        <BasiqInput />
+      </BasiqFormField>
+      <BasiqFormField
+        description="補足説明"
+        error="入力内容を確認してください"
+        label="Required + Description + Error"
+        required
+      >
+        <BasiqInput />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqFormField, BasiqInput },
     setup() {
@@ -134,6 +244,8 @@ export const Configurations: Story = {
 };
 
 export const EmptyError: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   args: { error: "", required: false },
   render: (args) => ({
     components: { BasiqFormField, BasiqInput },
@@ -161,6 +273,14 @@ export const EmptyError: Story = {
 };
 
 export const ExistingDescription: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <p id="external-description">外部の説明</p>
+      <BasiqFormField description="FormFieldの説明" label="説明の結合">
+        <BasiqInput aria-describedby="external-description" />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqFormField, BasiqInput },
     template: `
@@ -186,6 +306,19 @@ export const ExistingDescription: Story = {
 
 export const CustomRequiredAndError: Story = {
   args: { error: "入力内容を確認してください" },
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField
+        error="入力内容を確認してください"
+        label="ユーザー名"
+        required
+      >
+        <template #required>入力必須</template>
+        <BasiqInput />
+        <template #error="{ error }">{{ error }}（再入力してください）</template>
+      </BasiqFormField>
+    </template>
+  `),
   render: (args) => ({
     components: { BasiqFormField, BasiqInput },
     setup: () => ({ args }),
@@ -213,6 +346,14 @@ export const CustomRequiredAndError: Story = {
 };
 
 export const ExplicitControlId: Story = {
+  name: "Explicit control ID",
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField control-id="explicit-control" label="明示的なID">
+        <BasiqInput />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqFormField, BasiqInput },
     template: `
@@ -223,6 +364,12 @@ export const ExplicitControlId: Story = {
       </div>
     `,
   }),
+};
+
+export const ExplicitControlIdInteraction: Story = {
+  ...ExplicitControlId,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole("textbox", { name: "明示的なID" });
@@ -234,6 +381,23 @@ export const ExplicitControlId: Story = {
 };
 
 export const NativeControl: Story = {
+  parameters: createFixedVueSourceParameters(`
+    <template>
+      <BasiqFormField
+        v-slot="{ describedBy, id, invalid, required }"
+        description="BasiQ UI以外のcontrolも明示的に接続できます"
+        label="Native input"
+        required
+      >
+        <input
+          :id="id"
+          :aria-describedby="describedBy"
+          :aria-invalid="invalid || undefined"
+          :required="required"
+        />
+      </BasiqFormField>
+    </template>
+  `),
   render: () => ({
     components: { BasiqFormField },
     template: `
@@ -254,6 +418,12 @@ export const NativeControl: Story = {
       </div>
     `,
   }),
+};
+
+export const NativeControlInteraction: Story = {
+  ...NativeControl,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole("textbox", { name: "Native input" });
@@ -265,6 +435,8 @@ export const NativeControl: Story = {
 };
 
 export const FormSubmission: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
   render: () => ({
     components: { FormSubmissionHarness },
     template: "<FormSubmissionHarness />",

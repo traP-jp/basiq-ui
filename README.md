@@ -25,6 +25,10 @@ import "basiq-ui/styles.css";
 </template>
 ```
 
+## ドキュメント
+
+[Storybook](https://trap-jp.github.io/basiq-ui/)
+
 ## 開発
 
 Node.jsとpnpmのバージョンはmiseで管理しています。
