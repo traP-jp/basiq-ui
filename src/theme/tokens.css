@@ -15,4 +15,8 @@
   --basiq-border-width-strong: 2px;
   --basiq-focus-ring-gap: 2px;
   --basiq-focus-ring-width: 2px;
+  --basiq-layer-overlay: 1000;
+  --basiq-layer-toast: 1100;
+  --basiq-duration-overlay: 180ms;
+  --basiq-easing-standard: cubic-bezier(0.2, 0, 0, 1);
 }

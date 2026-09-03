@@ -42,6 +42,14 @@ export type {
   BasiqInputSize,
   BasiqInputType,
 } from "./components/input/BasiqInput.vue";
+export { default as BasiqDialog } from "./components/dialog/BasiqDialog.vue";
+export type {
+  BasiqDialogEmits,
+  BasiqDialogInitialFocus,
+  BasiqDialogProps,
+  BasiqDialogSlotProps,
+  BasiqPortalTarget,
+} from "./components/dialog/BasiqDialog.vue";
 export { default as BasiqRadioGroup } from "./components/radio-group/BasiqRadioGroup.vue";
 export type {
   BasiqRadioGroupEmits,
@@ -95,4 +103,9 @@ export type {
   BasiqToggleButtonProps,
 } from "./components/toggle-button/BasiqToggleButton.vue";
 export { default as BasiqThemeProvider } from "./theme/BasiqThemeProvider.vue";
-export type { BasiqThemeMode, BasiqThemeProviderProps } from "./theme/BasiqThemeProvider.vue";
+export type {
+  BasiqThemeColorOverrides,
+  BasiqThemeMode,
+  BasiqThemeOverrides,
+  BasiqThemeProviderProps,
+} from "./theme/BasiqThemeProvider.vue";

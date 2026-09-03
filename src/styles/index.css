@@ -2,3 +2,8 @@
 
 @import url("../theme/tokens.css");
 @import url("../theme/themes.css");
+
+[data-basiq-overlay-host] {
+  position: relative;
+  z-index: var(--basiq-layer-overlay);
+}
