@@ -25,6 +25,7 @@ export interface BasiqTabsProps {
   defaultValue?: string;
   dir?: BasiqTabsDirection;
   items: readonly BasiqTabsItem[];
+  listWidth?: string;
   loop?: boolean;
   modelValue?: string;
   orientation?: BasiqTabsOrientation;
@@ -47,6 +48,7 @@ const props = withDefaults(defineProps<BasiqTabsProps>(), {
   ariaLabelledby: undefined,
   defaultValue: undefined,
   dir: undefined,
+  listWidth: undefined,
   loop: true,
   modelValue: undefined,
   orientation: "horizontal",
@@ -141,7 +143,12 @@ function handleValueChange(value: string) {
     :unmount-on-hide="unmountOnHide"
     @update:model-value="handleValueChange"
   >
-    <BasiqTabsList :aria-label="ariaLabel" :aria-labelledby="ariaLabelledby" :loop="loop">
+    <BasiqTabsList
+      :aria-label="ariaLabel"
+      :aria-labelledby="ariaLabelledby"
+      :loop="loop"
+      :width="listWidth"
+    >
       <BasiqTabsTrigger
         v-for="(item, index) in items"
         :key="item.value"

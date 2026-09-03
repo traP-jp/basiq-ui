@@ -161,7 +161,7 @@ describe("BasiqTabs SSR", () => {
     const Root = defineComponent({
       setup: () => () =>
         h(BasiqTabsRoot, { defaultValue: "profile" }, () => [
-          h(BasiqTabsList, { "aria-label": "設定" }, () => [
+          h(BasiqTabsList, { "aria-label": "設定", width: "12rem" }, () => [
             h(BasiqTabsTrigger, { value: "profile" }, () => "プロフィール"),
             h(BasiqTabsTrigger, { value: "account" }, () => "アカウント"),
           ]),
@@ -173,6 +173,7 @@ describe("BasiqTabs SSR", () => {
 
     expect(html).toContain('role="tablist"');
     expect(html).toContain('aria-label="設定"');
+    expect(html).toContain("--basiq-tabs-list-width:12rem");
     expect(html).toContain('role="tabpanel"');
     expect(html).toContain("プロフィール本文");
   });

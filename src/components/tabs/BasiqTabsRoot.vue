@@ -88,6 +88,6 @@ watchEffect(() => {
 .root[data-orientation="vertical"] {
   flex-direction: row;
   align-items: flex-start;
-  gap: var(--basiq-space-400);
+  gap: var(--basiq-space-300);
 }
 </style>
