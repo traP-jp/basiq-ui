@@ -1,31 +1,45 @@
 <script setup lang="ts">
+import { computed, type Component } from "vue";
+
+import BasiqIcon from "../icon/BasiqIcon.vue";
+
 export type BasiqButtonTone = "accent" | "neutral" | "danger";
 export type BasiqButtonVariant = "solid" | "outline";
+export type BasiqButtonIconPlacement = "leading" | "trailing" | "only";
 
 export interface BasiqButtonProps {
   disabled?: boolean;
+  /** A currentColor-compatible Vue icon component. The button controls its size and spacing and treats it as decorative. */
+  icon?: Component;
+  /** Places an icon before the label, after it, or by itself. With an icon, `only` omits the default slot and requires an accessible name on the button. */
+  iconPlacement?: BasiqButtonIconPlacement;
   tone?: BasiqButtonTone;
   type?: "button" | "submit" | "reset";
   variant?: BasiqButtonVariant;
 }
 
-withDefaults(defineProps<BasiqButtonProps>(), {
+const props = withDefaults(defineProps<BasiqButtonProps>(), {
   disabled: false,
+  iconPlacement: "leading",
   tone: "accent",
   type: "button",
   variant: "solid",
 });
+const isIconOnly = computed(() => Boolean(props.icon) && props.iconPlacement === "only");
 </script>
 
 <template>
   <button
     :class="$style.root"
+    :data-icon-only="isIconOnly ? '' : undefined"
     :data-tone="tone"
     :data-variant="variant"
     :disabled="disabled"
     :type="type"
   >
-    <slot />
+    <BasiqIcon v-if="icon && iconPlacement !== 'trailing'" :class="$style.icon" :icon="icon" />
+    <slot v-if="!isIconOnly" />
+    <BasiqIcon v-if="icon && iconPlacement === 'trailing'" :class="$style.icon" :icon="icon" />
   </button>
 </template>
 
@@ -53,6 +67,20 @@ withDefaults(defineProps<BasiqButtonProps>(), {
   line-height: 1.5;
   cursor: pointer;
   appearance: none;
+}
+
+.root[data-icon-only] {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+}
+
+.icon {
+  font-size: 20px;
+}
+
+.root[data-icon-only] .icon {
+  font-size: 24px;
 }
 
 .root[data-tone="accent"][data-variant="solid"] {
