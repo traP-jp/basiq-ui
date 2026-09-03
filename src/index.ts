@@ -1,3 +1,11 @@
+export { default as BasiqAvatar } from "./components/avatar/BasiqAvatar.vue";
+export type {
+  BasiqAvatarEmits,
+  BasiqAvatarFallbackSlotProps,
+  BasiqAvatarProps,
+  BasiqAvatarShape,
+  BasiqAvatarSize,
+} from "./components/avatar/BasiqAvatar.vue";
 export { default as BasiqButton } from "./components/button/BasiqButton.vue";
 export type {
   BasiqButtonIconPlacement,
