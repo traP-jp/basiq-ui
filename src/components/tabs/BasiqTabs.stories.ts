@@ -60,6 +60,10 @@ const meta = {
       control: "inline-radio",
       options: ["ltr", "rtl"],
     },
+    listWidth: {
+      control: "text",
+      description: "Vertical時のTabListの幅。CSSの長さを指定し、Tabs全体の50%を上限とします。",
+    },
     orientation: {
       control: "inline-radio",
       options: ["horizontal", "vertical"],
@@ -73,6 +77,7 @@ const meta = {
         "ariaLabel",
         "dir",
         "items",
+        "listWidth",
         "loop",
         "orientation",
         "unmountOnHide",
@@ -144,6 +149,15 @@ export const ItemsApiInteraction: Story = {
     await expect(canvas.getByRole("tabpanel")).toHaveTextContent(
       "プロフィールと表示名を編集できます。",
     );
+
+    const panel = canvas.getByRole("tabpanel");
+    const profileRect = profile.getBoundingClientRect();
+    const accountRect = account.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+
+    await expect(accountRect.left - profileRect.right).toBeCloseTo(8, 5);
+    await expect(panelRect.top - profileRect.bottom).toBeCloseTo(12, 5);
+    await expect(panelRect.left).toBeCloseTo(profileRect.left, 5);
 
     await userEvent.click(account);
     await expect(args["onUpdate:modelValue"]).toHaveBeenCalledWith("account");
@@ -289,8 +303,16 @@ export const VerticalInteraction: Story = {
     const tabList = canvas.getByRole("tablist", { name: "設定" });
     const profile = canvas.getByRole("tab", { name: "プロフィール" });
     const account = canvas.getByRole("tab", { name: "アカウント" });
+    const panel = canvas.getByRole("tabpanel");
+
+    const profileRect = profile.getBoundingClientRect();
+    const accountRect = account.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
 
     await expect(tabList).toHaveAttribute("aria-orientation", "vertical");
+    await expect(accountRect.top - profileRect.bottom).toBeCloseTo(8, 5);
+    await expect(panelRect.left - profileRect.right).toBeCloseTo(12, 5);
+    await expect(panelRect.top).toBeCloseTo(profileRect.top, 5);
     profile.focus();
     await userEvent.keyboard("{ArrowDown}");
     await expect(account).toHaveFocus();
@@ -298,6 +320,55 @@ export const VerticalInteraction: Story = {
 
     await userEvent.click(profile);
     profile.blur();
+  },
+};
+
+export const VerticalWithListWidth: Story = {
+  args: {
+    ariaLabel: "設定",
+    items: settingsItems,
+    listWidth: "12rem",
+    orientation: "vertical",
+  },
+  parameters: createFixedVueSourceParameters(`
+    <script setup lang="ts">
+    import { BasiqTabs } from "basiq-ui";
+
+    const items = [
+      { content: "プロフィールと表示名を編集できます。", label: "プロフィール", value: "profile" },
+      { content: "ログイン方法とセッションを管理できます。", label: "アカウント", value: "account" },
+      { content: "通知の受け取り方を変更できます。", label: "通知", value: "notifications" },
+    ];
+    </script>
+
+    <template>
+      <BasiqTabs
+        aria-label="設定"
+        :items="items"
+        list-width="12rem"
+        orientation="vertical"
+      />
+    </template>
+  `),
+  render: (args) => ({
+    components: { BasiqTabs },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story" style="max-width: 40rem">
+        <BasiqTabs v-bind="args" />
+      </div>
+    `,
+  }),
+};
+
+export const VerticalWithListWidthInteraction: Story = {
+  ...VerticalWithListWidth,
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
+  play: async ({ canvasElement }) => {
+    const tabList = within(canvasElement).getByRole("tablist", { name: "設定" });
+
+    await expect(tabList.getBoundingClientRect().width).toBeCloseTo(192, 5);
   },
 };
 
@@ -884,5 +955,42 @@ export const VerticalNarrow: Story = {
 
     await expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);
     await expect(panel.getBoundingClientRect().width).toBeGreaterThanOrEqual(120);
+  },
+};
+
+export const VerticalContentWidthStability: Story = {
+  tags: ["regression", "!autodocs"],
+  parameters: controlsDisabledStoryParameters,
+  args: {
+    ariaLabel: "設定",
+    items: [
+      { content: "短い内容です。", label: "基本", value: "short" },
+      { label: "詳細", value: "long" },
+    ],
+    orientation: "vertical",
+  },
+  render: (args) => ({
+    components: { BasiqTabs },
+    setup: () => ({ args }),
+    template: `
+      <div class="basiq-story" style="max-width: 32rem">
+        <BasiqTabs v-bind="args">
+          <template #content="{ item }">
+            <span v-if="item.value === 'long'" style="white-space: nowrap">
+              TabPanelの内容が長くなってもTabListの幅は変化しません。
+            </span>
+            <span v-else>{{ item.content }}</span>
+          </template>
+        </BasiqTabs>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const tabList = canvas.getByRole("tablist", { name: "設定" });
+    const widthBefore = tabList.getBoundingClientRect().width;
+
+    await userEvent.click(canvas.getByRole("tab", { name: "詳細" }));
+    await expect(tabList.getBoundingClientRect().width).toBeCloseTo(widthBefore, 5);
   },
 };
