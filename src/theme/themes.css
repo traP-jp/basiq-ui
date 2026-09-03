@@ -72,6 +72,10 @@
   --basiq-color-text-control-placeholder: var(--basiq-color-content-subtle);
   --basiq-color-card-background: var(--basiq-color-surface-container);
   --basiq-color-card-divider: var(--basiq-color-border-separator);
+  --basiq-color-tag-background: var(--basiq-color-surface-container);
+  --basiq-color-tag-border: var(--basiq-color-border-separator);
+  --basiq-color-tag-remove-background-hover: #e3e5e7;
+  --basiq-color-tag-remove-background-pressed: #d7dadc;
   --basiq-color-button-background-accent-solid-rest: #126abf;
   --basiq-color-button-background-accent-solid-hover: #1565b1;
   --basiq-color-button-background-accent-solid-pressed: #195fa3;
@@ -203,6 +207,10 @@
   --basiq-color-text-control-placeholder: var(--basiq-color-content-subtle);
   --basiq-color-card-background: var(--basiq-color-surface-container);
   --basiq-color-card-divider: var(--basiq-color-border-separator);
+  --basiq-color-tag-background: var(--basiq-color-surface-container);
+  --basiq-color-tag-border: var(--basiq-color-border-separator);
+  --basiq-color-tag-remove-background-hover: #3a424b;
+  --basiq-color-tag-remove-background-pressed: #474f56;
   --basiq-color-button-background-accent-solid-rest: #4899f9;
   --basiq-color-button-background-accent-solid-hover: #5aa3fa;
   --basiq-color-button-background-accent-solid-pressed: #6dadfa;
@@ -336,6 +344,10 @@
     --basiq-color-text-control-placeholder: var(--basiq-color-content-subtle);
     --basiq-color-card-background: var(--basiq-color-surface-container);
     --basiq-color-card-divider: var(--basiq-color-border-separator);
+    --basiq-color-tag-background: var(--basiq-color-surface-container);
+    --basiq-color-tag-border: var(--basiq-color-border-separator);
+    --basiq-color-tag-remove-background-hover: #3a424b;
+    --basiq-color-tag-remove-background-pressed: #474f56;
     --basiq-color-button-background-accent-solid-rest: #4899f9;
     --basiq-color-button-background-accent-solid-hover: #5aa3fa;
     --basiq-color-button-background-accent-solid-pressed: #6dadfa;

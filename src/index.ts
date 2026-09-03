@@ -44,6 +44,15 @@ export type {
 } from "./components/radio-group/BasiqRadioGroup.vue";
 export { default as BasiqSwitch } from "./components/switch/BasiqSwitch.vue";
 export type { BasiqSwitchEmits, BasiqSwitchProps } from "./components/switch/BasiqSwitch.vue";
+export { default as BasiqTag } from "./components/tag/BasiqTag.vue";
+export type {
+  BasiqTagBaseProps,
+  BasiqTagDisplayProps,
+  BasiqTagEmits,
+  BasiqTagProps,
+  BasiqTagRemovableProps,
+  BasiqTagSlots,
+} from "./components/tag/BasiqTag.vue";
 export { default as BasiqTabs } from "./components/tabs/BasiqTabs.vue";
 export type {
   BasiqTabsEmits,
