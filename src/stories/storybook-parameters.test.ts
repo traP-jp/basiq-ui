@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createPlaygroundStoryParameters, fillComponentSlot } from "./storybook-parameters";
+import {
+  createFixedVueSourceParameters,
+  createPlaygroundStoryParameters,
+  fillComponentSlot,
+} from "./storybook-parameters";
 
 interface StoryExport {
   parameters?: {
@@ -74,8 +78,35 @@ describe("Storybook source examples", () => {
       { args: {} },
     );
 
-    expect(source).toContain('import { BasiqButton } from "basiq-ui";');
-    expect(source).toContain('<BasiqButton tone="danger" variant="outline">');
-    expect(source).toContain("Button");
+    expect(source).toBe(`<script setup lang="ts">
+import { BasiqButton } from "basiq-ui";
+</script>
+
+<template>
+  <BasiqButton tone="danger" variant="outline">
+    Button
+  </BasiqButton>
+</template>`);
+  });
+
+  it("dedents fixed source examples that already contain a script", () => {
+    const parameters = createFixedVueSourceParameters(`
+      <script setup lang="ts">
+      const label = "保存";
+      </script>
+
+      <template>
+        <BasiqButton>{{ label }}</BasiqButton>
+      </template>
+    `);
+
+    expect(parameters.docs.source.code).toBe(`<script setup lang="ts">
+import { BasiqButton } from "basiq-ui";
+const label = "保存";
+</script>
+
+<template>
+  <BasiqButton>{{ label }}</BasiqButton>
+</template>`);
   });
 });
