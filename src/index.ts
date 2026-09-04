@@ -23,6 +23,19 @@ export type {
   BasiqCheckboxEmits,
   BasiqCheckboxProps,
 } from "./components/checkbox/BasiqCheckbox.vue";
+export { default as BasiqCombobox } from "./components/combobox/BasiqCombobox.vue";
+export type {
+  BasiqComboboxCreatableProps,
+  BasiqComboboxEmits,
+  BasiqComboboxItem,
+  BasiqComboboxItemSlotProps,
+  BasiqComboboxMultipleProps,
+  BasiqComboboxNonCreatableProps,
+  BasiqComboboxProps,
+  BasiqComboboxSelectedSlotProps,
+  BasiqComboboxSingleProps,
+  BasiqComboboxValue,
+} from "./components/combobox/BasiqCombobox.types";
 export { default as BasiqChoiceGroup } from "./components/choice-group/BasiqChoiceGroup.vue";
 export type {
   BasiqChoiceGroupEmits,
@@ -106,6 +119,12 @@ export type {
   BasiqTagRemovableProps,
   BasiqTagSlots,
 } from "./components/tag/BasiqTag.vue";
+export { default as BasiqTagInput } from "./components/tag-input/BasiqTagInput.vue";
+export type {
+  BasiqTagInputEmits,
+  BasiqTagInputProps,
+  BasiqTagInputTagSlotProps,
+} from "./components/tag-input/BasiqTagInput.vue";
 export { default as BasiqTabs } from "./components/tabs/BasiqTabs.vue";
 export type {
   BasiqTabsEmits,
