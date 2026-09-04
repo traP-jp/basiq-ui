@@ -147,3 +147,32 @@
   margin: 0;
   font-size: 0.875rem;
 }
+
+.basiq-toast-status-color-comparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: 1rem;
+}
+
+.basiq-toast-status-color-comparison-panel {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 2rem;
+  color: var(--basiq-color-content-default);
+  background: var(--basiq-color-surface-base);
+}
+
+.basiq-toast-status-color-comparison-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  text-transform: capitalize;
+}
+
+.basiq-toast-status-color-comparison-stack {
+  display: grid;
+  gap: var(--basiq-space-200);
+  width: min(100%, 352px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

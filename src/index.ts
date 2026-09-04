@@ -123,6 +123,16 @@ export type {
   BasiqToggleButtonEmits,
   BasiqToggleButtonProps,
 } from "./components/toggle-button/BasiqToggleButton.vue";
+export { default as BasiqToastProvider } from "./components/toast/BasiqToastProvider.vue";
+export type { BasiqToastProviderProps } from "./components/toast/BasiqToastProvider.vue";
+export { useToast } from "./components/toast/toastContext";
+export type {
+  BasiqToastController,
+  BasiqToastId,
+  BasiqToastOptions,
+  BasiqToastPriority,
+  BasiqToastTone,
+} from "./components/toast/types";
 export { default as BasiqThemeProvider } from "./theme/BasiqThemeProvider.vue";
 export type {
   BasiqThemeColorOverrides,
