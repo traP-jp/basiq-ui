@@ -64,6 +64,31 @@ export type {
   BasiqDialogSlotProps,
   BasiqPortalTarget,
 } from "./components/dialog/BasiqDialog.vue";
+export { default as BasiqDropdownMenuContent } from "./components/dropdown-menu/BasiqDropdownMenuContent.vue";
+export type {
+  BasiqDropdownMenuAlign,
+  BasiqDropdownMenuContentProps,
+  BasiqDropdownMenuSide,
+  BasiqDropdownMenuWidth,
+} from "./components/dropdown-menu/BasiqDropdownMenuContent.vue";
+export { default as BasiqDropdownMenuGroup } from "./components/dropdown-menu/BasiqDropdownMenuGroup.vue";
+export { default as BasiqDropdownMenuItem } from "./components/dropdown-menu/BasiqDropdownMenuItem.vue";
+export type {
+  BasiqDropdownMenuItemEmits,
+  BasiqDropdownMenuItemProps,
+  BasiqDropdownMenuItemTone,
+} from "./components/dropdown-menu/BasiqDropdownMenuItem.vue";
+export { default as BasiqDropdownMenuLabel } from "./components/dropdown-menu/BasiqDropdownMenuLabel.vue";
+export { default as BasiqDropdownMenuRoot } from "./components/dropdown-menu/BasiqDropdownMenuRoot.vue";
+export type {
+  BasiqDropdownMenuDirection,
+  BasiqDropdownMenuRootEmits,
+  BasiqDropdownMenuRootProps,
+  BasiqDropdownMenuRootSlotProps,
+} from "./components/dropdown-menu/BasiqDropdownMenuRoot.vue";
+export { default as BasiqDropdownMenuSeparator } from "./components/dropdown-menu/BasiqDropdownMenuSeparator.vue";
+export { default as BasiqDropdownMenuTrigger } from "./components/dropdown-menu/BasiqDropdownMenuTrigger.vue";
+export type { BasiqDropdownMenuTriggerProps } from "./components/dropdown-menu/BasiqDropdownMenuTrigger.vue";
 export { default as BasiqNavigationItem } from "./components/navigation-list/BasiqNavigationItem.vue";
 export type { BasiqNavigationItemProps } from "./components/navigation-list/BasiqNavigationItem.vue";
 export { default as BasiqNavigationList } from "./components/navigation-list/BasiqNavigationList.vue";
