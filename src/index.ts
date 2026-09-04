@@ -70,6 +70,22 @@ export type {
   BasiqPushNavigationLayoutNavigationSlotProps,
   BasiqPushNavigationLayoutProps,
 } from "./components/push-navigation-layout/BasiqPushNavigationLayout.vue";
+export { default as BasiqPopoverClose } from "./components/popover/BasiqPopoverClose.vue";
+export { default as BasiqPopoverContent } from "./components/popover/BasiqPopoverContent.vue";
+export type {
+  BasiqPopoverAlign,
+  BasiqPopoverContentProps,
+  BasiqPopoverContentSlotProps,
+  BasiqPopoverSide,
+  BasiqPopoverWidth,
+} from "./components/popover/BasiqPopoverContent.vue";
+export { default as BasiqPopoverRoot } from "./components/popover/BasiqPopoverRoot.vue";
+export type {
+  BasiqPopoverRootEmits,
+  BasiqPopoverRootProps,
+  BasiqPopoverRootSlotProps,
+} from "./components/popover/BasiqPopoverRoot.vue";
+export { default as BasiqPopoverTrigger } from "./components/popover/BasiqPopoverTrigger.vue";
 export { default as BasiqRadioGroup } from "./components/radio-group/BasiqRadioGroup.vue";
 export type {
   BasiqRadioGroupEmits,
