@@ -68,6 +68,8 @@ const isInitiallyControlled = props.open !== undefined;
 const currentOpen = computed(() => props.open ?? uncontrolledOpen.value);
 const portalTarget = toRef(props, "portalTarget");
 const { contentStyle, overlayStyle, target, themeMode } = useOverlayPortal({
+  layer: "dialog",
+  modal: true,
   open: currentOpen,
   portalTarget,
 });

@@ -7,3 +7,15 @@
   position: relative;
   z-index: var(--basiq-layer-overlay);
 }
+
+[data-basiq-overlay-layer] {
+  position: relative;
+}
+
+[data-basiq-overlay-layer="dialog"] {
+  z-index: 0;
+}
+
+[data-basiq-overlay-layer="toast"] {
+  z-index: calc(var(--basiq-layer-toast) - var(--basiq-layer-overlay));
+}

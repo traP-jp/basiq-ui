@@ -246,7 +246,8 @@ export const ExplicitPortalTarget: Story = {
 
     const target = canvas.getByTestId("dialog-target");
     const dialog = await within(target).findByRole("dialog", { name: "指定先のDialog" });
-    await expect(dialog.parentElement).toBe(target);
+    await expect(dialog.parentElement).toHaveAttribute("data-basiq-overlay-layer", "dialog");
+    await expect(dialog.parentElement?.parentElement).toBe(target);
   },
 };
 
