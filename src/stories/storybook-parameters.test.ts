@@ -9,6 +9,12 @@ import {
 interface StoryExport {
   parameters?: {
     docs?: {
+      canvas?: {
+        sourceState?: unknown;
+      };
+      description?: {
+        component?: unknown;
+      };
       source?: {
         code?: unknown;
       };
@@ -64,6 +70,29 @@ describe("Storybook source examples", () => {
         }
       }
     }
+  });
+
+  it("publishes copyable Toast examples without Story-only helpers", () => {
+    const toastStories = storyModules[
+      "../components/toast/BasiqToastProvider.stories.ts"
+    ] as Record<string, StoryExport>;
+    const exampleNames = ["Playground", "UseToast", "Tones", "Priorities", "LongContent"];
+
+    for (const exampleName of exampleNames) {
+      const code = toastStories[exampleName]?.parameters?.docs?.source?.code;
+
+      expect(code, `${exampleName} must define a fixed source example`).toBeTypeOf("string");
+      expect(code).toMatch(/<script\b[^>]*\bsetup\b[^>]*>/);
+      expect(code).toMatch(/<template>/);
+      expect(code).not.toMatch(
+        /ToastControls|ToneControls|PriorityControls|StatusColorComparisonGallery/,
+      );
+    }
+
+    expect(toastStories.default?.parameters?.docs?.description?.component).toContain(
+      "BasiqToastProvider",
+    );
+    expect(toastStories.StatusColorComparison?.parameters?.docs?.canvas?.sourceState).toBe("none");
   });
 
   it("keeps generated Playground props while completing the Vue SFC", () => {

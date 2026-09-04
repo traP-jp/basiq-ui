@@ -71,7 +71,7 @@
     "typecheck": "vue-tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "reka-ui": "2.10.1"
+    "reka-ui": "2.10.4"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

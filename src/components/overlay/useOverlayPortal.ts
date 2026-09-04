@@ -6,12 +6,20 @@ import type { BasiqPortalTarget } from "./overlayContext";
 import { injectOverlayTarget, provideOverlayTarget } from "./overlayContext";
 import {
   acquireDefaultOverlayHost,
+  acquireOverlayLayer,
   acquireOverlayOrder,
+  type OverlayLayer,
   releaseDefaultOverlayHost,
+  releaseOverlayLayer,
+  setOverlayModalOpen,
+  subscribeOverlayModalState,
 } from "./overlayHost";
 
 interface UseOverlayPortalOptions {
+  layer?: OverlayLayer;
+  modal?: boolean;
   open: ComputedRef<boolean>;
+  ordered?: boolean;
   portalTarget: Ref<BasiqPortalTarget | undefined>;
 }
 
@@ -23,14 +31,25 @@ function warnInvalidTarget(target: BasiqPortalTarget) {
   );
 }
 
-export function useOverlayPortal({ open, portalTarget }: UseOverlayPortalOptions) {
+export function useOverlayPortal({
+  layer = "dialog",
+  modal = false,
+  open,
+  ordered = true,
+  portalTarget,
+}: UseOverlayPortalOptions) {
   const inheritedTarget = injectOverlayTarget();
   const theme = injectBasiqThemeContext();
+  const baseTarget = shallowRef<BasiqPortalTarget>();
   const target = shallowRef<BasiqPortalTarget>();
   const order = shallowRef(0);
+  const modalActive = shallowRef(false);
   let defaultHost: HTMLElement | undefined;
   let mounted = false;
-  let targetElement: HTMLElement | undefined;
+  let baseTargetElement: HTMLElement | undefined;
+  let layerTargetElement: HTMLElement | undefined;
+  let modalRegistered = false;
+  let unsubscribeModalState: (() => void) | undefined;
 
   const themeMode = computed(() => theme?.mode.value ?? "system");
   const themeStyle = computed(() => theme?.style.value ?? {});
@@ -65,20 +84,28 @@ export function useOverlayPortal({ open, portalTarget }: UseOverlayPortalOptions
 
   function useDefaultTarget() {
     defaultHost = acquireDefaultOverlayHost(document);
-    target.value = defaultHost;
-    targetElement = defaultHost;
+    setBaseTarget(defaultHost);
     return defaultHost;
   }
 
+  function setBaseTarget(element: HTMLElement, publicTarget: BasiqPortalTarget = element) {
+    baseTarget.value = publicTarget;
+    baseTargetElement = element;
+    layerTargetElement = acquireOverlayLayer(element, layer);
+    target.value = layerTargetElement;
+    unsubscribeModalState = subscribeOverlayModalState(element, (active) => {
+      modalActive.value = active;
+    });
+  }
+
   function ensureTarget({ allowDeferredSelector = false } = {}) {
-    if (targetElement) return targetElement;
+    if (baseTargetElement) return baseTargetElement;
 
     const requestedTarget = portalTarget.value ?? inheritedTarget?.value;
     const resolvedTarget = resolveExplicitTarget(requestedTarget);
 
     if (resolvedTarget) {
-      target.value = requestedTarget;
-      targetElement = resolvedTarget;
+      setBaseTarget(resolvedTarget, requestedTarget);
       return resolvedTarget;
     }
 
@@ -88,7 +115,7 @@ export function useOverlayPortal({ open, portalTarget }: UseOverlayPortalOptions
       typeof requestedTarget === "string" &&
       isValidSelector(requestedTarget)
     ) {
-      target.value = requestedTarget;
+      baseTarget.value = requestedTarget;
       return undefined;
     }
 
@@ -98,33 +125,49 @@ export function useOverlayPortal({ open, portalTarget }: UseOverlayPortalOptions
 
   function bringToFront() {
     const resolvedTarget = ensureTarget();
-    if (resolvedTarget) order.value = acquireOverlayOrder(resolvedTarget);
+    if (resolvedTarget && layerTargetElement && ordered) {
+      order.value = acquireOverlayOrder(layerTargetElement);
+    }
   }
 
-  provideOverlayTarget(target);
+  function syncModalRegistration(isOpen: boolean) {
+    if (!modal || !baseTargetElement || isOpen === modalRegistered) return;
+    setOverlayModalOpen(baseTargetElement, isOpen);
+    modalRegistered = isOpen;
+  }
+
+  provideOverlayTarget(baseTarget);
 
   watch(
     open,
     (isOpen, wasOpen) => {
       if (isOpen && !wasOpen && mounted) bringToFront();
+      if (mounted) syncModalRegistration(isOpen);
     },
     { flush: "sync" },
   );
 
   onBeforeMount(() => {
     const resolvedTarget = ensureTarget({ allowDeferredSelector: true });
-    if (open.value && resolvedTarget) order.value = acquireOverlayOrder(resolvedTarget);
+    if (open.value && resolvedTarget && layerTargetElement && ordered) {
+      order.value = acquireOverlayOrder(layerTargetElement);
+    }
+    syncModalRegistration(open.value);
   });
 
   onMounted(() => {
     mounted = true;
     ensureTarget();
     if (open.value && order.value === 0) bringToFront();
+    syncModalRegistration(open.value);
   });
 
   onUnmounted(() => {
+    syncModalRegistration(false);
+    unsubscribeModalState?.();
+    if (baseTargetElement) releaseOverlayLayer(baseTargetElement, layer);
     if (defaultHost) releaseDefaultOverlayHost(defaultHost);
   });
 
-  return { contentStyle, overlayStyle, target, themeMode, themeStyle };
+  return { contentStyle, modalActive, overlayStyle, target, themeMode, themeStyle };
 }

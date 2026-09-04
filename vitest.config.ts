@@ -19,7 +19,7 @@ export default mergeConfig(
           test: {
             name: "unit",
             environment: "node",
-            include: ["src/stories/**/*.test.ts"],
+            include: ["src/stories/**/*.test.ts", "src/**/*.unit.test.ts"],
           },
         },
         {

@@ -148,6 +148,21 @@
   --basiq-color-tabs-trigger-background-selected-hover: #126abf24;
   --basiq-color-tabs-trigger-background-selected-pressed: #126abf33;
   --basiq-color-tabs-content-background: var(--basiq-color-surface-container);
+  --basiq-color-toast-background-neutral: var(--basiq-color-surface-container);
+  --basiq-color-toast-background-info: #ecf3fa;
+  --basiq-color-toast-background-success: #edf7ef;
+  --basiq-color-toast-background-warning: #fff6df;
+  --basiq-color-toast-background-error: #fef3f1;
+  --basiq-color-toast-content: var(--basiq-color-content-default);
+  --basiq-color-toast-description: var(--basiq-color-content-subtle);
+  --basiq-color-toast-close: var(--basiq-color-content-subtle);
+  --basiq-color-toast-close-hover: #0d12170d;
+  --basiq-color-toast-accent-neutral: var(--basiq-color-content-subtle);
+  --basiq-color-toast-accent-info: var(--basiq-color-content-accent);
+  --basiq-color-toast-accent-success: #237a3b;
+  --basiq-color-toast-accent-warning: #8a5a00;
+  --basiq-color-toast-accent-error: var(--basiq-color-content-danger);
+  --basiq-shadow-toast: 0 8px 24px #0d121729;
 }
 
 [data-basiq-theme="dark"] {
@@ -298,6 +313,21 @@
   --basiq-color-tabs-trigger-background-selected-hover: #4899f924;
   --basiq-color-tabs-trigger-background-selected-pressed: #4899f92e;
   --basiq-color-tabs-content-background: var(--basiq-color-surface-container);
+  --basiq-color-toast-background-neutral: var(--basiq-color-surface-container);
+  --basiq-color-toast-background-info: #26384b;
+  --basiq-color-toast-background-success: #27392d;
+  --basiq-color-toast-background-warning: #3a3324;
+  --basiq-color-toast-background-error: #3a2d30;
+  --basiq-color-toast-content: var(--basiq-color-content-default);
+  --basiq-color-toast-description: var(--basiq-color-content-subtle);
+  --basiq-color-toast-close: var(--basiq-color-content-subtle);
+  --basiq-color-toast-close-hover: #ffffff14;
+  --basiq-color-toast-accent-neutral: var(--basiq-color-content-subtle);
+  --basiq-color-toast-accent-info: var(--basiq-color-content-accent);
+  --basiq-color-toast-accent-success: #65c97a;
+  --basiq-color-toast-accent-warning: #f2b84b;
+  --basiq-color-toast-accent-error: var(--basiq-color-content-danger);
+  --basiq-shadow-toast: 0 8px 24px #0006;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -450,5 +480,20 @@
     --basiq-color-tabs-trigger-background-selected-hover: #4899f924;
     --basiq-color-tabs-trigger-background-selected-pressed: #4899f92e;
     --basiq-color-tabs-content-background: var(--basiq-color-surface-container);
+    --basiq-color-toast-background-neutral: var(--basiq-color-surface-container);
+    --basiq-color-toast-background-info: #26384b;
+    --basiq-color-toast-background-success: #27392d;
+    --basiq-color-toast-background-warning: #3a3324;
+    --basiq-color-toast-background-error: #3a2d30;
+    --basiq-color-toast-content: var(--basiq-color-content-default);
+    --basiq-color-toast-description: var(--basiq-color-content-subtle);
+    --basiq-color-toast-close: var(--basiq-color-content-subtle);
+    --basiq-color-toast-close-hover: #ffffff14;
+    --basiq-color-toast-accent-neutral: var(--basiq-color-content-subtle);
+    --basiq-color-toast-accent-info: var(--basiq-color-content-accent);
+    --basiq-color-toast-accent-success: #65c97a;
+    --basiq-color-toast-accent-warning: #f2b84b;
+    --basiq-color-toast-accent-error: var(--basiq-color-content-danger);
+    --basiq-shadow-toast: 0 8px 24px #0006;
   }
 }
