@@ -99,6 +99,21 @@ export type {
   BasiqPopoverRootSlotProps,
 } from "./components/popover/BasiqPopoverRoot.vue";
 export { default as BasiqPopoverTrigger } from "./components/popover/BasiqPopoverTrigger.vue";
+export { default as BasiqTooltipContent } from "./components/tooltip/BasiqTooltipContent.vue";
+export type {
+  BasiqTooltipAlign,
+  BasiqTooltipContentProps,
+  BasiqTooltipSide,
+} from "./components/tooltip/BasiqTooltipContent.vue";
+export { default as BasiqTooltipProvider } from "./components/tooltip/BasiqTooltipProvider.vue";
+export type { BasiqTooltipProviderProps } from "./components/tooltip/BasiqTooltipProvider.vue";
+export { default as BasiqTooltipRoot } from "./components/tooltip/BasiqTooltipRoot.vue";
+export type {
+  BasiqTooltipRootEmits,
+  BasiqTooltipRootProps,
+  BasiqTooltipRootSlotProps,
+} from "./components/tooltip/BasiqTooltipRoot.vue";
+export { default as BasiqTooltipTrigger } from "./components/tooltip/BasiqTooltipTrigger.vue";
 export { default as BasiqRadioGroup } from "./components/radio-group/BasiqRadioGroup.vue";
 export type {
   BasiqRadioGroupEmits,

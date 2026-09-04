@@ -89,6 +89,9 @@
   --basiq-color-select-item-background-highlighted: var(--basiq-color-surface-muted);
   --basiq-color-select-item-content-selected: var(--basiq-color-content-accent);
   --basiq-color-select-item-indicator: var(--basiq-color-content-accent);
+  --basiq-color-tooltip-background: var(--basiq-color-content-default);
+  --basiq-color-tooltip-border: var(--basiq-color-content-default);
+  --basiq-color-tooltip-content: var(--basiq-color-surface-base);
   --basiq-color-card-background: var(--basiq-color-surface-container);
   --basiq-color-card-divider: var(--basiq-color-border-separator);
   --basiq-color-tag-background: var(--basiq-color-surface-container);
@@ -273,6 +276,9 @@
   --basiq-color-select-item-background-highlighted: var(--basiq-color-surface-muted);
   --basiq-color-select-item-content-selected: var(--basiq-color-content-accent);
   --basiq-color-select-item-indicator: var(--basiq-color-content-accent);
+  --basiq-color-tooltip-background: var(--basiq-color-content-default);
+  --basiq-color-tooltip-border: var(--basiq-color-content-default);
+  --basiq-color-tooltip-content: var(--basiq-color-surface-base);
   --basiq-color-card-background: var(--basiq-color-surface-container);
   --basiq-color-card-divider: var(--basiq-color-border-separator);
   --basiq-color-tag-background: var(--basiq-color-surface-container);
@@ -459,6 +465,9 @@
     --basiq-color-select-item-background-highlighted: var(--basiq-color-surface-muted);
     --basiq-color-select-item-content-selected: var(--basiq-color-content-accent);
     --basiq-color-select-item-indicator: var(--basiq-color-content-accent);
+    --basiq-color-tooltip-background: var(--basiq-color-content-default);
+    --basiq-color-tooltip-border: var(--basiq-color-content-default);
+    --basiq-color-tooltip-content: var(--basiq-color-surface-base);
     --basiq-color-card-background: var(--basiq-color-surface-container);
     --basiq-color-card-divider: var(--basiq-color-border-separator);
     --basiq-color-tag-background: var(--basiq-color-surface-container);
