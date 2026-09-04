@@ -108,12 +108,15 @@ export function createFixedVueSourceParameters(code: string) {
 }
 
 function dedent(code: string) {
-  const lines = code.trim().split("\n");
-  const indentation = Math.min(
-    ...lines
-      .filter((line) => line.trim().length > 0)
-      .map((line) => line.match(/^\s*/)?.[0].length ?? 0),
-  );
+  const lines = code.split("\n");
+  const contentLines = lines.filter((line) => line.trim().length > 0);
 
-  return lines.map((line) => line.slice(indentation)).join("\n");
+  if (contentLines.length === 0) return "";
+
+  const indentation = Math.min(...contentLines.map((line) => line.match(/^\s*/)?.[0].length ?? 0));
+
+  return lines
+    .map((line) => line.slice(indentation))
+    .join("\n")
+    .trim();
 }
