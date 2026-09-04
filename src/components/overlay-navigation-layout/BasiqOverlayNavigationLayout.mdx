@@ -1,0 +1,36 @@
+import { ArgTypes, Meta, Source, Title } from "@storybook/addon-docs/blocks";
+import * as OverlayNavigationLayoutStories from "./BasiqOverlayNavigationLayout.stories";
+
+<Meta of={OverlayNavigationLayoutStories} />
+
+<Title />
+
+`BasiqOverlayNavigationLayout` is a full-viewport app-shell layout that opens from the physical
+left edge. Place it near the application root, outside transformed or contained ancestors. The
+overlay remains in the layout's DOM tree rather than using a Portal.
+
+Open an isolated Canvas to try the modal interaction:
+
+- <a href="?path=/story/layouts-overlaynavigationlayout--uncontrolled" target="_top">
+    Uncontrolled
+  </a>
+- <a href="?path=/story/layouts-overlaynavigationlayout--controlled" target="_top">
+    Controlled
+  </a>
+- <a href="?path=/story/layouts-overlaynavigationlayout--close-on-navigation" target="_top">
+    Close after in-app navigation
+  </a>
+
+<ArgTypes of={OverlayNavigationLayoutStories} />
+
+## Uncontrolled
+
+<Source of={OverlayNavigationLayoutStories.Uncontrolled} />
+
+## Controlled
+
+<Source of={OverlayNavigationLayoutStories.Controlled} />
+
+## Close after in-app navigation
+
+<Source of={OverlayNavigationLayoutStories.CloseOnNavigation} />
