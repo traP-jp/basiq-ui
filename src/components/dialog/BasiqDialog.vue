@@ -127,6 +127,7 @@ function handleOpenAutoFocus(event: Event) {
       <DialogOverlay :class="$style.overlay" :data-basiq-theme="themeMode" :style="overlayStyle" />
       <DialogContent
         v-bind="getForwardedAttrs()"
+        aria-modal="true"
         :class="[$style.content, $attrs.class]"
         :data-basiq-theme="themeMode"
         :style="[$attrs.style, contentStyle]"

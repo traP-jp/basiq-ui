@@ -73,6 +73,22 @@
   --basiq-color-text-control-border-invalid: var(--basiq-color-content-danger);
   --basiq-color-text-control-content: var(--basiq-color-content-default);
   --basiq-color-text-control-placeholder: var(--basiq-color-content-subtle);
+  --basiq-color-select-trigger-background: var(--basiq-color-text-control-background);
+  --basiq-color-select-trigger-background-disabled: var(
+    --basiq-color-text-control-background-disabled
+  );
+  --basiq-color-select-trigger-border: var(--basiq-color-text-control-border);
+  --basiq-color-select-trigger-border-hover: var(--basiq-color-accent-default);
+  --basiq-color-select-trigger-border-disabled: var(--basiq-color-text-control-border-disabled);
+  --basiq-color-select-trigger-border-invalid: var(--basiq-color-text-control-border-invalid);
+  --basiq-color-select-trigger-content: var(--basiq-color-text-control-content);
+  --basiq-color-select-trigger-placeholder: var(--basiq-color-text-control-placeholder);
+  --basiq-color-select-icon: var(--basiq-color-content-subtle);
+  --basiq-color-select-content-background: var(--basiq-color-surface-base);
+  --basiq-color-select-content-border: var(--basiq-color-border-separator);
+  --basiq-color-select-item-background-highlighted: var(--basiq-color-surface-muted);
+  --basiq-color-select-item-content-selected: var(--basiq-color-content-accent);
+  --basiq-color-select-item-indicator: var(--basiq-color-content-accent);
   --basiq-color-card-background: var(--basiq-color-surface-container);
   --basiq-color-card-divider: var(--basiq-color-border-separator);
   --basiq-color-tag-background: var(--basiq-color-surface-container);
@@ -241,6 +257,22 @@
   --basiq-color-text-control-border-invalid: var(--basiq-color-content-danger);
   --basiq-color-text-control-content: var(--basiq-color-content-default);
   --basiq-color-text-control-placeholder: var(--basiq-color-content-subtle);
+  --basiq-color-select-trigger-background: var(--basiq-color-text-control-background);
+  --basiq-color-select-trigger-background-disabled: var(
+    --basiq-color-text-control-background-disabled
+  );
+  --basiq-color-select-trigger-border: var(--basiq-color-text-control-border);
+  --basiq-color-select-trigger-border-hover: var(--basiq-color-accent-default);
+  --basiq-color-select-trigger-border-disabled: var(--basiq-color-text-control-border-disabled);
+  --basiq-color-select-trigger-border-invalid: var(--basiq-color-text-control-border-invalid);
+  --basiq-color-select-trigger-content: var(--basiq-color-text-control-content);
+  --basiq-color-select-trigger-placeholder: var(--basiq-color-text-control-placeholder);
+  --basiq-color-select-icon: var(--basiq-color-content-subtle);
+  --basiq-color-select-content-background: var(--basiq-color-surface-base);
+  --basiq-color-select-content-border: var(--basiq-color-border-separator);
+  --basiq-color-select-item-background-highlighted: var(--basiq-color-surface-muted);
+  --basiq-color-select-item-content-selected: var(--basiq-color-content-accent);
+  --basiq-color-select-item-indicator: var(--basiq-color-content-accent);
   --basiq-color-card-background: var(--basiq-color-surface-container);
   --basiq-color-card-divider: var(--basiq-color-border-separator);
   --basiq-color-tag-background: var(--basiq-color-surface-container);
@@ -411,6 +443,22 @@
     --basiq-color-text-control-border-invalid: var(--basiq-color-content-danger);
     --basiq-color-text-control-content: var(--basiq-color-content-default);
     --basiq-color-text-control-placeholder: var(--basiq-color-content-subtle);
+    --basiq-color-select-trigger-background: var(--basiq-color-text-control-background);
+    --basiq-color-select-trigger-background-disabled: var(
+      --basiq-color-text-control-background-disabled
+    );
+    --basiq-color-select-trigger-border: var(--basiq-color-text-control-border);
+    --basiq-color-select-trigger-border-hover: var(--basiq-color-accent-default);
+    --basiq-color-select-trigger-border-disabled: var(--basiq-color-text-control-border-disabled);
+    --basiq-color-select-trigger-border-invalid: var(--basiq-color-text-control-border-invalid);
+    --basiq-color-select-trigger-content: var(--basiq-color-text-control-content);
+    --basiq-color-select-trigger-placeholder: var(--basiq-color-text-control-placeholder);
+    --basiq-color-select-icon: var(--basiq-color-content-subtle);
+    --basiq-color-select-content-background: var(--basiq-color-surface-base);
+    --basiq-color-select-content-border: var(--basiq-color-border-separator);
+    --basiq-color-select-item-background-highlighted: var(--basiq-color-surface-muted);
+    --basiq-color-select-item-content-selected: var(--basiq-color-content-accent);
+    --basiq-color-select-item-indicator: var(--basiq-color-content-accent);
     --basiq-color-card-background: var(--basiq-color-surface-container);
     --basiq-color-card-divider: var(--basiq-color-border-separator);
     --basiq-color-tag-background: var(--basiq-color-surface-container);

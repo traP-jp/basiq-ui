@@ -107,6 +107,16 @@ export type {
   BasiqRadioGroupOrientation,
   BasiqRadioGroupProps,
 } from "./components/radio-group/BasiqRadioGroup.vue";
+export { default as BasiqSelect } from "./components/select/BasiqSelect.vue";
+export type {
+  BasiqSelectEmits,
+  BasiqSelectDirection,
+  BasiqSelectItemDefinition,
+  BasiqSelectItemSlotProps,
+  BasiqSelectProps,
+  BasiqSelectSize,
+  BasiqSelectValueSlotProps,
+} from "./components/select/BasiqSelect.vue";
 export { default as BasiqSidebarLayout } from "./components/sidebar-layout/BasiqSidebarLayout.vue";
 export { default as BasiqSwitch } from "./components/switch/BasiqSwitch.vue";
 export type { BasiqSwitchEmits, BasiqSwitchProps } from "./components/switch/BasiqSwitch.vue";
