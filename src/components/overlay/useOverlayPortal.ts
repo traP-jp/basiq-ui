@@ -1,5 +1,5 @@
-import type { ComputedRef, Ref } from "vue";
-import { computed, onBeforeMount, onMounted, onUnmounted, shallowRef, watch } from "vue";
+import type { ComputedRef, MaybeRefOrGetter, Ref } from "vue";
+import { computed, onBeforeMount, onMounted, onUnmounted, shallowRef, toValue, watch } from "vue";
 
 import { injectBasiqThemeContext } from "../../theme/context";
 import type { BasiqPortalTarget } from "./overlayContext";
@@ -17,7 +17,7 @@ import {
 
 interface UseOverlayPortalOptions {
   layer?: OverlayLayer;
-  modal?: boolean;
+  modal?: MaybeRefOrGetter<boolean>;
   open: ComputedRef<boolean>;
   ordered?: boolean;
   portalTarget: Ref<BasiqPortalTarget | undefined>;
@@ -131,9 +131,13 @@ export function useOverlayPortal({
   }
 
   function syncModalRegistration(isOpen: boolean) {
-    if (!modal || !baseTargetElement || isOpen === modalRegistered) return;
-    setOverlayModalOpen(baseTargetElement, isOpen);
-    modalRegistered = isOpen;
+    if (!baseTargetElement) return;
+
+    const shouldRegister = toValue(modal) && isOpen;
+    if (shouldRegister === modalRegistered) return;
+
+    setOverlayModalOpen(baseTargetElement, shouldRegister);
+    modalRegistered = shouldRegister;
   }
 
   provideOverlayTarget(baseTarget);
@@ -143,6 +147,14 @@ export function useOverlayPortal({
     (isOpen, wasOpen) => {
       if (isOpen && !wasOpen && mounted) bringToFront();
       if (mounted) syncModalRegistration(isOpen);
+    },
+    { flush: "sync" },
+  );
+
+  watch(
+    () => toValue(modal),
+    () => {
+      if (mounted) syncModalRegistration(open.value);
     },
     { flush: "sync" },
   );
