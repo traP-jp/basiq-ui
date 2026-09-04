@@ -3,9 +3,8 @@ import "@fontsource/inter/latin-700.css";
 import "@fontsource/m-plus-1p/japanese-400.css";
 import "@fontsource/m-plus-1p/japanese-700.css";
 import type { Preview } from "@storybook/vue3-vite";
-import { defineComponent, h } from "vue";
 
-import BasiqThemeProvider, { type BasiqThemeMode } from "../src/theme/BasiqThemeProvider.vue";
+import BasiqThemeProvider from "../src/theme/BasiqThemeProvider.vue";
 import storybookTheme from "./storybook-theme";
 
 import "../src/styles/index.css";
@@ -13,27 +12,27 @@ import "./preview.css";
 
 const preview: Preview = {
   decorators: [
-    (story, context) =>
-      defineComponent({
-        name: "StorybookThemeDecorator",
-        setup() {
-          const rootClass = [
-            "basiq-storybook-root",
-            context.viewMode === "docs" ? "basiq-storybook-docs-root" : undefined,
-          ];
+    (story, context) => ({
+      name: "StorybookThemeDecorator",
+      components: { BasiqThemeProvider, story },
+      setup() {
+        const rootClass = [
+          "basiq-storybook-root",
+          context.viewMode === "docs" ? "basiq-storybook-docs-root" : undefined,
+        ];
 
-          return () =>
-            h(
-              BasiqThemeProvider,
-              {
-                class: rootClass,
-                mode: context.globals.themeMode as BasiqThemeMode,
-                "data-storybook-mode": context.globals.themeMode,
-              },
-              { default: () => h(story()) },
-            );
-        },
-      }),
+        return { rootClass, storybookContext: context };
+      },
+      template: `
+          <BasiqThemeProvider
+            :class="rootClass"
+            :mode="storybookContext.globals.themeMode"
+            :data-storybook-mode="storybookContext.globals.themeMode"
+          >
+            <story />
+          </BasiqThemeProvider>
+        `,
+    }),
   ],
   globalTypes: {
     themeMode: {
@@ -69,7 +68,7 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        order: ["Documents", "Foundation", "Components", "Examples", "Development"],
+        order: ["Documents", "Foundation", "Components", "Layouts", "Examples", "Development"],
       },
     },
   },

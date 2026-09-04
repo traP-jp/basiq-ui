@@ -19,4 +19,11 @@
   --basiq-layer-toast: 1100;
   --basiq-duration-overlay: 180ms;
   --basiq-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --basiq-layout-container-max-width: 72rem;
+  --basiq-layout-container-padding-inline: clamp(
+    var(--basiq-space-400),
+    4vw,
+    var(--basiq-space-800)
+  );
+  --basiq-layout-sidebar-width: 16rem;
 }
