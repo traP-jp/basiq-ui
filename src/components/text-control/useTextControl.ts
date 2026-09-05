@@ -56,6 +56,10 @@ export function useTextControl<Element extends HTMLInputElement | HTMLTextAreaEl
   function handleValueInput(event: Event) {
     const value = (event.target as Element).value;
 
+    setValue(value);
+  }
+
+  function setValue(value: string) {
     if (!isControlled) internalValue.value = value;
     emitModelValue(value);
   }
@@ -90,5 +94,6 @@ export function useTextControl<Element extends HTMLInputElement | HTMLTextAreaEl
     resolveInvalid,
     resolvedId,
     resolvedRequired,
+    setValue,
   };
 }
