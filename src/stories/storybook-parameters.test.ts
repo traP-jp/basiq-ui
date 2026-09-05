@@ -7,6 +7,7 @@ import {
 } from "./storybook-parameters";
 
 interface StoryExport {
+  tags?: unknown;
   parameters?: {
     docs?: {
       canvas?: {
@@ -93,6 +94,35 @@ describe("Storybook source examples", () => {
       "BasiqToastProvider",
     );
     expect(toastStories.StatusColorComparison?.parameters?.docs?.canvas?.sourceState).toBe("none");
+  });
+
+  it("publishes copyable Calendar examples without serialized Story args", () => {
+    const calendarStories = storyModules[
+      "../components/calendar/BasiqCalendar.stories.ts"
+    ] as Record<string, StoryExport>;
+    const exampleNames = [
+      "Default",
+      "Controlled",
+      "Restrictions",
+      "LocaleAndWeekStart",
+      "Readonly",
+      "RightToLeft",
+      "Disabled",
+    ];
+
+    for (const exampleName of exampleNames) {
+      const code = calendarStories[exampleName]?.parameters?.docs?.source?.code;
+
+      expect(code, `${exampleName} must define a fixed source example`).toBeTypeOf("string");
+      expect(code).toMatch(/<script\b[^>]*\bsetup\b[^>]*>/);
+      expect(code).toMatch(/<template>/);
+      expect(code).toContain("BasiqCalendar");
+      expect(code).not.toMatch(
+        /ControlledCalendar|RejectingCalendar|calendar\.identifier|"calendar":\s*\{/,
+      );
+    }
+
+    expect(calendarStories.MonthAndYearNavigation?.tags).toContain("!autodocs");
   });
 
   it("keeps generated Playground props while completing the Vue SFC", () => {
