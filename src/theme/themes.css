@@ -22,6 +22,8 @@
   --basiq-color-control-background-disabled-accent: #d4e6f1;
   --basiq-color-avatar-background: var(--basiq-color-surface-muted);
   --basiq-color-avatar-content: var(--basiq-color-content-default);
+  --basiq-color-progress-indicator: var(--basiq-color-accent-default);
+  --basiq-color-progress-track-border: var(--basiq-color-content-disabled);
   --basiq-color-overlay-scrim: rgb(13 18 23 / 56%);
   --basiq-color-checkbox-background-unchecked-rest: var(--basiq-color-surface-container);
   --basiq-color-checkbox-background-unchecked-hover: var(--basiq-color-surface-muted);
@@ -223,6 +225,8 @@
   --basiq-color-control-background-disabled-accent: #304655;
   --basiq-color-avatar-background: var(--basiq-color-surface-muted);
   --basiq-color-avatar-content: var(--basiq-color-content-default);
+  --basiq-color-progress-indicator: var(--basiq-color-accent-default);
+  --basiq-color-progress-track-border: var(--basiq-color-content-disabled);
   --basiq-color-overlay-scrim: rgb(13 18 23 / 68%);
   --basiq-color-checkbox-background-unchecked-rest: var(--basiq-color-surface-container);
   --basiq-color-checkbox-background-unchecked-hover: #3a424b;
@@ -426,6 +430,8 @@
     --basiq-color-control-background-disabled-accent: #304655;
     --basiq-color-avatar-background: var(--basiq-color-surface-muted);
     --basiq-color-avatar-content: var(--basiq-color-content-default);
+    --basiq-color-progress-indicator: var(--basiq-color-accent-default);
+    --basiq-color-progress-track-border: var(--basiq-color-content-disabled);
     --basiq-color-overlay-scrim: rgb(13 18 23 / 68%);
     --basiq-color-checkbox-background-unchecked-rest: var(--basiq-color-surface-container);
     --basiq-color-checkbox-background-unchecked-hover: #3a424b;
