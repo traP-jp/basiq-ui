@@ -143,6 +143,8 @@ export type {
   BasiqPopoverRootSlotProps,
 } from "./components/popover/BasiqPopoverRoot.vue";
 export { default as BasiqPopoverTrigger } from "./components/popover/BasiqPopoverTrigger.vue";
+export { default as BasiqProgress } from "./components/progress/BasiqProgress.vue";
+export type { BasiqProgressProps } from "./components/progress/BasiqProgress.vue";
 export { default as BasiqTooltipContent } from "./components/tooltip/BasiqTooltipContent.vue";
 export type {
   BasiqTooltipAlign,
