@@ -77,6 +77,12 @@ export type {
   BasiqInputSlots,
   BasiqInputType,
 } from "./components/input/BasiqInput.vue";
+export { default as BasiqSearchField } from "./components/search-field/BasiqSearchField.vue";
+export type {
+  BasiqSearchFieldEmits,
+  BasiqSearchFieldExposed,
+  BasiqSearchFieldProps,
+} from "./components/search-field/BasiqSearchField.vue";
 export { default as BasiqDialog } from "./components/dialog/BasiqDialog.vue";
 export type {
   BasiqDialogEmits,
