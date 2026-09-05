@@ -71,8 +71,10 @@ export type {
 export { default as BasiqInput } from "./components/input/BasiqInput.vue";
 export type {
   BasiqInputEmits,
+  BasiqInputExposed,
   BasiqInputProps,
   BasiqInputSize,
+  BasiqInputSlots,
   BasiqInputType,
 } from "./components/input/BasiqInput.vue";
 export { default as BasiqDialog } from "./components/dialog/BasiqDialog.vue";
