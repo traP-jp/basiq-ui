@@ -33,6 +33,7 @@ const slots = defineSlots<{
 
 const baseId = `basiq-field-${useId()}`;
 const resolvedControlId = computed(() => props.controlId ?? `${baseId}-control`);
+const labelId = `${baseId}-label`;
 const descriptionId = `${baseId}-description`;
 const errorId = `${baseId}-error`;
 const hasLabel = computed(() => props.label !== undefined || Boolean(slots.label));
@@ -43,6 +44,7 @@ const hasError = computed(() => typeof props.error === "string" && props.error.l
 const errorMessage = computed(() => props.error ?? "");
 const invalid = computed(() => props.invalid === true || hasError.value);
 const required = computed(() => props.required);
+const resolvedLabelId = computed(() => (hasLabel.value ? labelId : undefined));
 const describedBy = computed(() => {
   const ids = [
     hasDescription.value ? descriptionId : undefined,
@@ -89,6 +91,7 @@ provide(basiqFormFieldContextKey, {
   controlId: resolvedControlId,
   describedBy,
   invalid,
+  labelId: resolvedLabelId,
   registerControl,
   required,
 });
@@ -98,7 +101,7 @@ provide(basiqFormFieldContextKey, {
   <div :class="$style.root" :data-invalid="invalid ? '' : undefined">
     <div v-if="hasLabel || hasDescription" :class="$style.meta">
       <div v-if="hasLabel" :class="$style['label-row']">
-        <label :class="$style.label" :for="resolvedControlId">
+        <label :id="labelId" :class="$style.label" :for="resolvedControlId">
           <slot name="label">{{ label }}</slot>
         </label>
         <span v-if="required" :class="$style.required" aria-hidden="true">

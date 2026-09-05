@@ -17,6 +17,25 @@ export { default as BasiqIcon } from "./components/icon/BasiqIcon.vue";
 export type { BasiqIconProps } from "./components/icon/BasiqIcon.vue";
 export { default as BasiqCard } from "./components/card/BasiqCard.vue";
 export type { BasiqCardProps } from "./components/card/BasiqCard.vue";
+export { default as BasiqCalendar } from "./components/calendar/BasiqCalendar.vue";
+export type {
+  BasiqCalendarDirection,
+  BasiqCalendarEmits,
+  BasiqCalendarLabels,
+  BasiqCalendarProps,
+  BasiqDateMatcher,
+  BasiqWeekStartsOn,
+} from "./components/calendar/BasiqCalendar.vue";
+export { default as BasiqDatePicker } from "./components/date-picker/BasiqDatePicker.vue";
+export type {
+  BasiqDatePickerEmits,
+  BasiqDatePickerLabels,
+  BasiqDatePickerProps,
+  BasiqDatePickerSize,
+  BasiqDatePickerValidationMessageSlotProps,
+  BasiqDatePickerValidationReason,
+  BasiqDatePickerValidationState,
+} from "./components/date-picker/BasiqDatePicker.vue";
 export { default as BasiqContainer } from "./components/container/BasiqContainer.vue";
 export { default as BasiqCheckbox } from "./components/checkbox/BasiqCheckbox.vue";
 export type {

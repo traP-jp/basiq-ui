@@ -192,6 +192,13 @@
   --basiq-color-toast-accent-warning: #8a5a00;
   --basiq-color-toast-accent-error: var(--basiq-color-content-danger);
   --basiq-shadow-toast: 0 8px 24px #0d121729;
+  --basiq-color-calendar-cell-pressed: #d7dde2;
+  --basiq-color-calendar-cell-selected: var(--basiq-color-accent-default);
+  --basiq-color-calendar-cell-selected-hover: #1565b1;
+  --basiq-color-calendar-cell-selected-pressed: #195fa3;
+  --basiq-color-calendar-cell-selected-content: var(--basiq-color-content-on-accent);
+  --basiq-color-calendar-today: var(--basiq-color-content-accent);
+  --basiq-color-calendar-unavailable: var(--basiq-color-content-subtle);
 }
 
 [data-basiq-theme="dark"] {
@@ -386,6 +393,13 @@
   --basiq-color-toast-accent-warning: #f2b84b;
   --basiq-color-toast-accent-error: var(--basiq-color-content-danger);
   --basiq-shadow-toast: 0 8px 24px #0006;
+  --basiq-color-calendar-cell-pressed: #474f56;
+  --basiq-color-calendar-cell-selected: var(--basiq-color-accent-default);
+  --basiq-color-calendar-cell-selected-hover: #5aa3fa;
+  --basiq-color-calendar-cell-selected-pressed: #6dadfa;
+  --basiq-color-calendar-cell-selected-content: var(--basiq-color-content-on-accent);
+  --basiq-color-calendar-today: var(--basiq-color-content-accent);
+  --basiq-color-calendar-unavailable: var(--basiq-color-content-subtle);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -582,5 +596,12 @@
     --basiq-color-toast-accent-warning: #f2b84b;
     --basiq-color-toast-accent-error: var(--basiq-color-content-danger);
     --basiq-shadow-toast: 0 8px 24px #0006;
+    --basiq-color-calendar-cell-pressed: #474f56;
+    --basiq-color-calendar-cell-selected: var(--basiq-color-accent-default);
+    --basiq-color-calendar-cell-selected-hover: #5aa3fa;
+    --basiq-color-calendar-cell-selected-pressed: #6dadfa;
+    --basiq-color-calendar-cell-selected-content: var(--basiq-color-content-on-accent);
+    --basiq-color-calendar-today: var(--basiq-color-content-accent);
+    --basiq-color-calendar-unavailable: var(--basiq-color-content-subtle);
   }
 }

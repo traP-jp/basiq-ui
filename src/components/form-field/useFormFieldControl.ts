@@ -18,6 +18,7 @@ export function useFormFieldControl({ componentName, props }: UseFormFieldContro
   const attrs = useAttrs();
   const formField = inject(basiqFormFieldContextKey, null);
   const resolvedId = computed(() => formField?.controlId.value ?? props.id);
+  const resolvedLabelId = computed(() => formField?.labelId.value);
   const forcedInvalid = computed(() => formField?.invalid.value === true || props.invalid === true);
   const resolvedRequired = computed(
     () => formField?.required.value === true || props.required === true,
@@ -83,6 +84,7 @@ export function useFormFieldControl({ componentName, props }: UseFormFieldContro
     resolveAriaInvalid,
     resolveInvalid,
     resolvedId,
+    resolvedLabelId,
     resolvedRequired,
   };
 }
