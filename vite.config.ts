@@ -23,7 +23,7 @@ export default defineConfig({
       cssFileName: "styles",
     },
     rollupOptions: {
-      external: ["vue", "reka-ui"],
+      external: ["@internationalized/date", "vue", "reka-ui"],
     },
   },
 });

@@ -4,6 +4,7 @@ export interface BasiqFormFieldContext {
   controlId: ComputedRef<string>;
   describedBy: ComputedRef<string | undefined>;
   invalid: ComputedRef<boolean>;
+  labelId: ComputedRef<string | undefined>;
   registerControl: (componentName: string) => () => void;
   required: ComputedRef<boolean>;
 }
